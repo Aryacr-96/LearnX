@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import { Link as RouterLink } from "react-router-dom";
 import {
   Box,
   Container,
@@ -840,18 +840,20 @@ function About() {
               </Text>
             </Box>
 
-            <Button
-              background="#101828"
-              color="#ffffff"
-              borderRadius="30px"
-              paddingX="22px"
-              height="36px"
-              fontSize="13px"
-              flexShrink="0"
-              _hover={{ background: "#263247" }}
-            >
-              See Open Roles
-            </Button>
+           <Button
+  as={RouterLink}
+  to="/careers"
+  background="#101828"
+  color="#ffffff"
+  borderRadius="30px"
+  paddingX="22px"
+  height="36px"
+  fontSize="13px"
+  flexShrink="0"
+  _hover={{ background: "#263247" }}
+>
+  See Open Roles
+</Button>
           </Flex>
         </Container>
       </Box>

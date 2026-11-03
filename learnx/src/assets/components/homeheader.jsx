@@ -385,27 +385,27 @@ function HomeHeader() {
           </Text>
 
           {/* BOOK A CALLBACK BUTTON */}
-          <Button
-            type="button"
-            onClick={openEnquiry}
-            cursor="pointer"
-            bg="rgba(255,255,255,0.1)"
-            color="white"
-            border="1px solid rgba(255,255,255,0.5)"
-            backdropFilter="blur(10px)"
-            borderRadius="full"
-            height={{ base: "48px", md: "54px" }}
-            px={{ base: "24px", md: "34px" }}
-            mr={{ base: "0", md: "250px" }}
-            fontFamily="'Inter', sans-serif"
-            fontSize={{ base: "14px", md: "16px" }}
-            fontWeight="600"
-            _hover={{ bg: "rgba(255,255,255,0.2)" }}
-            position="relative"
-            zIndex={5}
-          >
-            {banners[activeIndex].cta}
-          </Button>
+            <Button
+          as={Link}
+          to="/contact"
+          cursor="pointer"
+          bg="rgba(255,255,255,0.1)"
+          color="white"
+          border="1px solid rgba(255,255,255,0.5)"
+          backdropFilter="blur(10px)"
+          borderRadius="full"
+          height={{ base: "48px", md: "54px" }}
+          px={{ base: "24px", md: "34px" }}
+          mr={{ base: "0", md: "250px" }}
+          fontFamily="'Inter', sans-serif"
+          fontSize={{ base: "14px", md: "16px" }}
+          fontWeight="600"
+          _hover={{ bg: "rgba(255,255,255,0.2)" }}
+          position="relative"
+          zIndex={5}
+        >
+          {banners[activeIndex].cta}
+        </Button>
         </Flex>
 
         {/* BOTTOM-LEFT CALL CARD */}

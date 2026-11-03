@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -15,6 +14,7 @@ import {
 } from "@chakra-ui/react";
 
 import { FiArrowRight } from "react-icons/fi";
+import { FaImage } from "react-icons/fa";
 
 import Header from "../components/header";
 import Footer from "../components/footer";
@@ -207,22 +207,39 @@ function CourseDetails() {
               maxW={{ base: "350px", md: "330px" }}
               flexShrink={0}
             >
-              <Image
-                src={getImageUrl(course.image)}
-                alt={course.title}
-                width="100%"
-                height={{ base: "350px", sm: "400px", md: "485px" }}
-                objectFit="cover"
-                borderRadius="25px"
-                boxShadow="0 12px 30px rgba(0,0,0,0.13)"
-                fallback={
-                  <Box
-                    height="485px"
-                    bg="gray.100"
-                    borderRadius="25px"
-                  />
-                }
-              />
+              {/* COURSE IMAGE OR PLACEHOLDER */}
+              {course.image ? (
+                <Image
+                  src={getImageUrl(course.image)}
+                  alt={course.title}
+                  width="100%"
+                  height={{ base: "350px", sm: "400px", md: "485px" }}
+                  objectFit="cover"
+                  borderRadius="25px"
+                  boxShadow="0 12px 30px rgba(0,0,0,0.13)"
+                />
+              ) : (
+                <Flex
+                  width="100%"
+                  height={{ base: "350px", sm: "400px", md: "485px" }}
+                  bg="#F1F5F9"
+                  borderRadius="25px"
+                  boxShadow="0 12px 30px rgba(0,0,0,0.13)"
+                  align="center"
+                  justify="center"
+                  direction="column"
+                  gap="12px"
+                  color="#94A3B8"
+                >
+                  <Box fontSize="50px">
+                    <FaImage />
+                  </Box>
+
+                  <Text fontSize="15px" fontWeight="500">
+                    No Image Available
+                  </Text>
+                </Flex>
+              )}
             </Box>
 
             <Box flex="1" width="100%">

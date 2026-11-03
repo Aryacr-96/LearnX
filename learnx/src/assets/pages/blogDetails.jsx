@@ -13,9 +13,9 @@ import {
 } from "@chakra-ui/react";
 import {
   FaCalendarAlt,
-  FaClock,
   FaEye,
   FaArrowLeft,
+  FaImage,
 } from "react-icons/fa";
 
 import Header from "../components/header";
@@ -31,6 +31,27 @@ function BlogDetails() {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // ================= DATE FORMATTER =================
+
+  const formatDate = (date) => {
+    if (!date) return "—";
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "—";
+    }
+
+    return parsedDate.toLocaleDateString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
+  // ================= LOAD BLOG =================
 
   useEffect(() => {
     let cancelled = false;
@@ -59,12 +80,19 @@ function BlogDetails() {
 
     if (slug) {
       load();
+    } else {
+      setLoading(false);
+      setError("Blog not found.");
     }
 
     return () => {
       cancelled = true;
     };
   }, [slug]);
+
+  const imageUrl = post?.image
+    ? resolveImageUrl(post.image)
+    : null;
 
   return (
     <>
@@ -99,6 +127,8 @@ function BlogDetails() {
           }}
         >
           <Box maxWidth="900px" width="100%" margin="0 auto">
+
+            {/* BACK TO BLOG */}
             <Link
               as={RouterLink}
               to="/blog"
@@ -115,6 +145,7 @@ function BlogDetails() {
               Back to Blog
             </Link>
 
+            {/* LOADING */}
             {loading ? (
               <Flex justify="center" py="60px">
                 <Spinner size="lg" color="#8b5cf6" />
@@ -125,6 +156,7 @@ function BlogDetails() {
               </Text>
             ) : (
               <>
+                {/* BLOG TITLE */}
                 <Heading
                   as="h1"
                   color="#172b45"
@@ -145,6 +177,7 @@ function BlogDetails() {
                   {post.title}
                 </Heading>
 
+                {/* BLOG META INFORMATION */}
                 <Flex
                   alignItems="center"
                   flexWrap="wrap"
@@ -162,22 +195,8 @@ function BlogDetails() {
                     <FaCalendarAlt color="#8b5cf6" />
 
                     <Text>
-                      {post.uploaded_at
-                        ? new Date(post.uploaded_at).toLocaleDateString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            }
-                          )
-                        : "—"}
+                      {formatDate(post.uploaded_at)}
                     </Text>
-                  </Flex>
-
-                  <Flex alignItems="center" gap="6px">
-                    <FaClock />
-                    <Text>5 Mins Read</Text>
                   </Flex>
 
                   <Flex alignItems="center" gap="6px">
@@ -186,9 +205,10 @@ function BlogDetails() {
                   </Flex>
                 </Flex>
 
-                {post.image && (
+                {/* BLOG IMAGE OR PLACEHOLDER */}
+                {imageUrl ? (
                   <Image
-                    src={resolveImageUrl(post.image)}
+                    src={imageUrl}
                     alt={post.title}
                     width="100%"
                     height={{
@@ -201,9 +221,32 @@ function BlogDetails() {
                     marginBottom="30px"
                     borderRadius="10px"
                   />
+                ) : (
+                  <Flex
+                    width="100%"
+                    height={{
+                      base: "220px",
+                      sm: "280px",
+                      md: "360px",
+                    }}
+                    align="center"
+                    justify="center"
+                    direction="column"
+                    gap="12px"
+                    background="#F1F5F9"
+                    color="#94A3B8"
+                    borderRadius="10px"
+                    marginBottom="30px"
+                  >
+                    <FaImage size={45} />
+
+                    <Text fontSize="14px" fontWeight="medium">
+                      No Image Available
+                    </Text>
+                  </Flex>
                 )}
 
-                {/* Rich text description from CKEditor */}
+                {/* RICH TEXT DESCRIPTION FROM EDITOR */}
                 <Box
                   fontSize={{ base: "14px", md: "16px" }}
                   lineHeight="1.9"
@@ -271,11 +314,11 @@ function BlogDetails() {
                     },
                   }}
                   dangerouslySetInnerHTML={{
-                    __html: post.description,
+                    __html: post.description || "",
                   }}
                 />
 
-                {/* SEO keywords */}
+                {/* SEO KEYWORDS */}
                 {post.meta_keywords && (
                   <Flex
                     flexWrap="wrap"
@@ -309,3 +352,5 @@ function BlogDetails() {
 }
 
 export default BlogDetails;
+
+

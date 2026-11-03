@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -17,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 
 import { FiSearch, FiClock } from "react-icons/fi";
+import { FaImage } from "react-icons/fa";
 
 import Header from "../components/header";
 import Footer from "../components/footer";
@@ -286,31 +286,44 @@ function Course() {
                     }}
                   >
                     {/* COURSE IMAGE */}
-                    <Image
-                      src={getImageUrl(course.image)}
-                      alt={course.title}
-                      width="100%"
-                      height={{
-                        base: "210px",
-                        sm: "190px",
-                        md: "200px",
-                        lg: "190px",
-                      }}
-                      objectFit="cover"
-                      fallback={
-                        <Flex
-                          height="190px"
-                          bg="gray.100"
-                          align="center"
-                          justify="center"
-                          color="gray.500"
-                          fontSize="sm"
-                          fontWeight="500"
-                        >
-                          Image Not Found
-                        </Flex>
-                      }
-                    />
+                    {course.image ? (
+                      <Image
+                        src={getImageUrl(course.image)}
+                        alt={course.title}
+                        width="100%"
+                        height={{
+                          base: "210px",
+                          sm: "190px",
+                          md: "200px",
+                          lg: "190px",
+                        }}
+                        objectFit="cover"
+                      />
+                    ) : (
+                      <Flex
+                        width="100%"
+                        height={{
+                          base: "210px",
+                          sm: "190px",
+                          md: "200px",
+                          lg: "190px",
+                        }}
+                        bg="#F1F5F9"
+                        align="center"
+                        justify="center"
+                        direction="column"
+                        gap="10px"
+                        color="#94A3B8"
+                      >
+                        <Box fontSize="35px">
+                          <FaImage />
+                        </Box>
+
+                        <Text fontSize="14px" fontWeight="500">
+                          No Image Available
+                        </Text>
+                      </Flex>
+                    )}
 
                     {/* CARD CONTENT */}
                     <Flex

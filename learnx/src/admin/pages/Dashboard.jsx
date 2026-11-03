@@ -104,7 +104,7 @@ export default function Dashboard() {
         </Grid>
       </Box>
 
-      <Box bg="white" padding="24px" borderRadius="16px" border="1px solid" borderColor="gray.200">
+      {/* <Box bg="white" padding="24px" borderRadius="16px" border="1px solid" borderColor="gray.200">
         <Heading size="md" marginBottom="12px" color="#20243A">Manage your website</Heading>
         <Text color="gray.600" lineHeight="1.8">
           Use the sidebar to access Blogs, Courses, Gallery, Website Content, Enquiries and Settings.
@@ -113,7 +113,7 @@ export default function Dashboard() {
           <Text>Explore modules</Text>
           <FiArrowRight />
         </HStack>
-      </Box>
+      </Box> */}
     </VStack>
   );
 }
