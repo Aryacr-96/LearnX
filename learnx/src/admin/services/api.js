@@ -1,8 +1,5 @@
-// Use this for LOCAL development (fixes your current error):
-const API_BASE_URL = "http://127.0.0.1:8000/api";
 
-// When you are ready to deploy, comment the line above and uncomment the line below:
-// const API_BASE_URL = "https://demo2.appziatec.in/api";
+const API_BASE_URL = "http://127.0.0.1:8000/api";
 
 export const getToken = () =>
   localStorage.getItem("learnx_admin_token");
