@@ -21,7 +21,9 @@ import { FaImage } from "react-icons/fa";
 import Header from "../components/header";
 import Footer from "../components/footer";
 
-const BACKEND_URL = "http://localhost:8000";
+// Localhost setup (commented out):
+// const BACKEND_URL = "http://localhost:8000";
+import { BACKEND_BASE_URL as BACKEND_URL } from "../../services/publicApi";
 
 function Course() {
   const navigate = useNavigate();

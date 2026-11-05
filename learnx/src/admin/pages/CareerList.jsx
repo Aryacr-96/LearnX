@@ -10,6 +10,7 @@ import {
   FiFileText, FiAlertTriangle,
 } from "react-icons/fi";
 import { getAll, create, patch, remove } from "../services/crud";
+import { API_BASE_URL, BACKEND_BASE_URL } from "../../services/publicApi";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 
@@ -183,8 +184,10 @@ export default function CareerList() {
     if (!viewJobId) return;
 
     try {
+      // Localhost setup (commented out):
+      // const response = await fetch(`http://localhost:8000/api/careers/${viewJobId}/applications/${appId}/`,
       const response = await fetch(
-        `http://localhost:8000/api/careers/${viewJobId}/applications/${appId}/`,
+        `${API_BASE_URL}/careers/${viewJobId}/applications/${appId}/`,
         {
           method: "DELETE",
           headers: {
@@ -1280,7 +1283,7 @@ export default function CareerList() {
                               <Button
                                 size="xs"
                                 as="a"
-                                href={`http://localhost:8000${app.resume_url}`}
+                                href={`${BACKEND_BASE_URL}${app.resume_url}`}
                                 target="_blank"
                                 rel="noreferrer"
                                 variant="outline"

@@ -6,9 +6,10 @@ import {
 import { FiChevronDown, FiPlayCircle } from "react-icons/fi";
 import Header from "../components/header";
 import Footer from "../components/footer";
-import { resolveImageUrl } from "../../services/publicApi";
+import { resolveImageUrl, BACKEND_BASE_URL as BACKEND_URL } from "../../services/publicApi";
 
-const BACKEND_URL = "http://localhost:8000";
+// Localhost setup (commented out):
+// const BACKEND_URL = "http://localhost:8000";
 
 const pagePadding = {
   base: "20px", sm: "30px", md: "45px", lg: "180px", xl: "190px",

@@ -46,7 +46,9 @@ const IMG = {
   float6: "/images/pic3.jpg",
 };
 
-const BACKEND_URL = "http://localhost:8000";
+// Localhost setup (commented out):
+// const BACKEND_URL = "http://localhost:8000";
+import { BACKEND_BASE_URL as BACKEND_URL } from "../../services/publicApi";
 
 const pagePadding = {
   base: "20px",

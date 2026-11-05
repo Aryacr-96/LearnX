@@ -1,6 +1,16 @@
 
-const API_BASE_URL = "http://127.0.0.1:8000/api";
-const BACKEND_BASE_URL = "http://127.0.0.1:8000";
+// Localhost setup (commented out):
+// export const BACKEND_BASE_URL = "http://127.0.0.1:8000";
+// export const API_BASE_URL = "http://127.0.0.1:8000/api";
+
+// Dynamic URLs reading from .env
+export const BACKEND_BASE_URL = (
+  import.meta.env.VITE_MEDIA_BASE_URL || "http://127.0.0.1:8000"
+).replace(/\/+$/, "");
+
+export const API_BASE_URL = `${(
+  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000"
+).replace(/\/+$/, "")}/api`;
 
 export const resolveImageUrl = (url) => {
   if (!url) return null;

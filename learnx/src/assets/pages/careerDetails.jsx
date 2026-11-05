@@ -19,7 +19,9 @@ import Header from "../components/header";
 import Footer from "../components/footer";
 import { toaster } from "../../App"; 
 
-const BACKEND_URL = "http://localhost:8000";
+// Localhost setup (commented out):
+// const BACKEND_URL = "http://localhost:8000";
+import { BACKEND_BASE_URL as BACKEND_URL } from "../../services/publicApi";
 
 const pagePadding = {
   base: "20px",

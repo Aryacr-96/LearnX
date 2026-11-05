@@ -2,15 +2,28 @@
 Django settings for backendlearnx project.
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load environment variables from .env
+load_dotenv(BASE_DIR / '.env')
 
 # Security
-SECRET_KEY = 'django-insecure-$imdp61!&scc+(*7n$23_8lbvyrfgh**$7nd*88h%rt%)+vfd*'
-DEBUG = True
-ALLOWED_HOSTS = []
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-replace-me-later')
+DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 't')
+
+# Localhost setup (commented out):
+# ALLOWED_HOSTS = []
+
+ALLOWED_HOSTS = [
+    'demo2.appziatec.in',
+    'localhost',
+    '127.0.0.1',
+    '*',
+]
 
 
 # Application definition
@@ -66,10 +79,27 @@ WSGI_APPLICATION = 'backendlearnx.wsgi.application'
 
 
 # Database
+# SQLite setup (commented out):
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+# MySQL Database setup from .env
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('DB_NAME', 'LearnX'),
+        'USER': os.getenv('DB_USER', 'root'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'akshaytr'),
+        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+        'PORT': os.getenv('DB_PORT', '3306'),
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 
@@ -143,8 +173,23 @@ MAILERS = {
 }
 
 
-# React development server access
+# React development server & hosted backend access
+# Localhost setup (commented out):
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:5173',
+#     'http://127.0.0.1:5173',
+# ]
+
 CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'https://demo2.appziatec.in',
+]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://demo2.appziatec.in',
     'http://localhost:5173',
     'http://127.0.0.1:5173',
 ]

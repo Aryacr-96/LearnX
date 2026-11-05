@@ -27,7 +27,7 @@ export default function AdminLogin() {
     setError("");
     setLoading(true);
     try {
-      await adminLogin(username.trim(), password);
+      await adminLogin(username.trim(), password.trim());
       navigate("/admin/dashboard", { replace: true });
     } catch (err) {
       setError(err.message || "Unable to log in.");

@@ -37,7 +37,7 @@ from .serializers import (
 @permission_classes([AllowAny])
 def admin_login(request):
     username = request.data.get("username", "").strip()
-    password = request.data.get("password", "")
+    password = request.data.get("password", "").strip()
 
     if not username or not password:
         return Response(

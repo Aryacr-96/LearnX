@@ -13,6 +13,7 @@ import {
   Checkbox,
   NativeSelect,
 } from "@chakra-ui/react";
+import { API_BASE_URL } from "../../services/publicApi";
 
 export default function EnquiryModal({ isOpen, onClose }) {
   const [name, setName] = useState("");
@@ -81,19 +82,19 @@ export default function EnquiryModal({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/api/callbacks/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: name.trim(),
-            phone: `${countryCode} ${phone}`,
-          }),
-        }
-      );
+      // Localhost setup (commented out):
+      // const response = await fetch("http://127.0.0.1:8000/api/callbacks/", { ... });
+
+      const response = await fetch(`${API_BASE_URL}/callbacks/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          phone: `${countryCode} ${phone}`,
+        }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
