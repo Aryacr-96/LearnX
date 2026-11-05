@@ -23,6 +23,7 @@ import {
   FaYoutube,
   FaLinkedinIn,
   FaArrowLeft,
+  FaArrowRight,
   FaBars,
 } from "react-icons/fa";
 
@@ -61,6 +62,9 @@ function HomeHeader() {
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [isEnquiryOpen, setIsEnquiryOpen] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
+  // Social icons visibility
+  const [showSocialIcons, setShowSocialIcons] = React.useState(true);
 
   const openEnquiry = () => {
     setIsMobileMenuOpen(false);
@@ -122,11 +126,7 @@ function HomeHeader() {
           pt={{ base: "16px", md: "30px" }}
           px={{ base: "16px", sm: "22px", md: "40px" }}
         >
-          <Flex
-            align="center"
-            justify="space-between"
-            gap="12px"
-          >
+          <Flex align="center" justify="space-between" gap="12px">
             {/* LOGO */}
             <Link
               to="/"
@@ -228,6 +228,7 @@ function HomeHeader() {
         >
           <Portal>
             <Drawer.Backdrop zIndex={1000} />
+
             <Drawer.Positioner zIndex={1001}>
               <Drawer.Content
                 bg="#111827"
@@ -312,28 +313,150 @@ function HomeHeader() {
           zIndex={5}
           display={{ base: "none", md: "flex" }}
         >
-          {[
-            FaArrowLeft,
-            FaPhoneAlt,
-            FaWhatsapp,
-            FaInstagram,
-            FaFacebookF,
-            FaYoutube,
-            FaLinkedinIn,
-          ].map((IconComponent, index) => (
-            <Flex
-              key={index}
-              align="center"
-              justify="center"
-              color="white"
-              fontSize="22px"
-              cursor="pointer"
-              transition="transform 0.2s ease"
-              _hover={{ transform: "scale(1.2)" }}
-            >
-              <Icon as={IconComponent} />
-            </Flex>
-          ))}
+          {/* TOGGLE ARROW - ALWAYS VISIBLE */}
+          <Flex
+            align="center"
+            justify="center"
+            color="white"
+            fontSize="22px"
+            cursor="pointer"
+            transition="transform 0.2s ease"
+            _hover={{ transform: "scale(1.2)" }}
+            onClick={() =>
+              setShowSocialIcons((prev) => !prev)
+            }
+            aria-label={
+              showSocialIcons
+                ? "Hide social media icons"
+                : "Show social media icons"
+            }
+            title={
+              showSocialIcons
+                ? "Hide social media icons"
+                : "Show social media icons"
+            }
+          >
+            <Icon
+              as={showSocialIcons ? FaArrowLeft : FaArrowRight}
+            />
+          </Flex>
+
+          {/* SOCIAL MEDIA ICONS */}
+          {showSocialIcons && (
+            <>
+              <Flex
+                as="a"
+                href="tel:+914936220969"
+                align="center"
+                justify="center"
+                color="white"
+                fontSize="22px"
+                cursor="pointer"
+                transition="transform 0.2s ease"
+                _hover={{
+                  transform: "scale(1.2)",
+                  color: "#DD7E43",
+                }}
+              >
+                <Icon as={FaPhoneAlt} />
+              </Flex>
+
+              <Flex
+                as="a"
+                href="https://wa.me/919876543210"
+                target="_blank"
+                rel="noopener noreferrer"
+                align="center"
+                justify="center"
+                color="white"
+                fontSize="22px"
+                cursor="pointer"
+                transition="transform 0.2s ease"
+                _hover={{
+                  transform: "scale(1.2)",
+                  color: "#DD7E43",
+                }}
+              >
+                <Icon as={FaWhatsapp} />
+              </Flex>
+
+              <Flex
+                as="a"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                align="center"
+                justify="center"
+                color="white"
+                fontSize="22px"
+                cursor="pointer"
+                transition="transform 0.2s ease"
+                _hover={{
+                  transform: "scale(1.2)",
+                  color: "#DD7E43",
+                }}
+              >
+                <Icon as={FaInstagram} />
+              </Flex>
+
+              <Flex
+                as="a"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                align="center"
+                justify="center"
+                color="white"
+                fontSize="22px"
+                cursor="pointer"
+                transition="transform 0.2s ease"
+                _hover={{
+                  transform: "scale(1.2)",
+                  color: "#DD7E43",
+                }}
+              >
+                <Icon as={FaFacebookF} />
+              </Flex>
+
+              <Flex
+                as="a"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                align="center"
+                justify="center"
+                color="white"
+                fontSize="22px"
+                cursor="pointer"
+                transition="transform 0.2s ease"
+                _hover={{
+                  transform: "scale(1.2)",
+                  color: "#DD7E43",
+                }}
+              >
+                <Icon as={FaYoutube} />
+              </Flex>
+
+              <Flex
+                as="a"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                align="center"
+                justify="center"
+                color="white"
+                fontSize="22px"
+                cursor="pointer"
+                transition="transform 0.2s ease"
+                _hover={{
+                  transform: "scale(1.2)",
+                  color: "#DD7E43",
+                }}
+              >
+                <Icon as={FaLinkedinIn} />
+              </Flex>
+            </>
+          )}
         </VStack>
 
         {/* HERO CONTENT */}
@@ -385,27 +508,27 @@ function HomeHeader() {
           </Text>
 
           {/* BOOK A CALLBACK BUTTON */}
-            <Button
-          as={Link}
-          to="/contact"
-          cursor="pointer"
-          bg="rgba(255,255,255,0.1)"
-          color="white"
-          border="1px solid rgba(255,255,255,0.5)"
-          backdropFilter="blur(10px)"
-          borderRadius="full"
-          height={{ base: "48px", md: "54px" }}
-          px={{ base: "24px", md: "34px" }}
-          mr={{ base: "0", md: "250px" }}
-          fontFamily="'Inter', sans-serif"
-          fontSize={{ base: "14px", md: "16px" }}
-          fontWeight="600"
-          _hover={{ bg: "rgba(255,255,255,0.2)" }}
-          position="relative"
-          zIndex={5}
-        >
-          {banners[activeIndex].cta}
-        </Button>
+          <Button
+            as={Link}
+            to="/contact"
+            cursor="pointer"
+            bg="rgba(255,255,255,0.1)"
+            color="white"
+            border="1px solid rgba(255,255,255,0.5)"
+            backdropFilter="blur(10px)"
+            borderRadius="full"
+            height={{ base: "48px", md: "54px" }}
+            px={{ base: "24px", md: "34px" }}
+            mr={{ base: "0", md: "250px" }}
+            fontFamily="'Inter', sans-serif"
+            fontSize={{ base: "14px", md: "16px" }}
+            fontWeight="600"
+            _hover={{ bg: "rgba(255,255,255,0.2)" }}
+            position="relative"
+            zIndex={5}
+          >
+            {banners[activeIndex].cta}
+          </Button>
         </Flex>
 
         {/* BOTTOM-LEFT CALL CARD */}

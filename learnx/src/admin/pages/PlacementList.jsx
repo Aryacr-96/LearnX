@@ -672,7 +672,7 @@ export default function PlacementList() {
                           name="name"
                           value={form.name}
                           onChange={changeField}
-                          placeholder="e.g. Rahul Sharma"
+                          // placeholder="e.g. Rahul Sharma"
                           borderRadius="10px"
                           size="lg"
                           required

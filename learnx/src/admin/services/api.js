@@ -1,5 +1,4 @@
-
-const API_BASE_URL = "http://127.0.0.1:8000/api";
+const API_BASE_URL = "https://demo2.appziatec.in/backendlearnx/api";
 
 export const getToken = () =>
   localStorage.getItem("learnx_admin_token");

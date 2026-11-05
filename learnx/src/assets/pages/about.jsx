@@ -17,7 +17,7 @@ import Header from "../components/header";
 import Footer from "../components/footer";
 
 // Replace with your actual Django backend URL
-const BACKEND_URL = "http://localhost:8000"; 
+const BACKEND_URL = "http://localhost:8000";
 
 const history = [
   {
@@ -115,9 +115,21 @@ function About() {
 
   // Helper to format Django image URLs
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return "";
+    if (!imagePath) return undefined;
     if (imagePath.startsWith("http")) return imagePath;
     return `${BACKEND_URL}${imagePath}`;
+  };
+
+  // Helper to build initials for the placeholder
+  const getInitials = (name) => {
+    if (!name) return "?";
+    return name
+      .split(" ")
+      .filter(Boolean)
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
   };
 
   return (
@@ -410,7 +422,7 @@ function About() {
             <Heading
               as="h2"
               fontSize={{
-               base: "20px",
+                base: "20px",
                 md: "35px",
               }}
               fontWeight="750"
@@ -580,7 +592,7 @@ function About() {
             <Heading
               as="h2"
               fontSize={{
-                 base: "20px",
+                base: "20px",
                 md: "35px",
               }}
               fontWeight="750"
@@ -752,19 +764,48 @@ function About() {
                       boxShadow: "0 12px 28px rgba(20,40,70,0.08)",
                     }}
                   >
-                    <Image
-                      src={getImageUrl(member.image)}
-                      alt={member.name}
-                      width="100%"
-                      height={{
-                        base: "250px",
-                        md: "225px",
-                      }}
-                      objectFit="cover"
-                      borderRadius="16px"
-                      marginBottom="15px"
-                      fallback={<Box height="225px" bg="gray.100" borderRadius="16px" marginBottom="15px" />}
-                    />
+                    {member.image ? (
+                      <Image
+                        src={getImageUrl(member.image)}
+                        alt={member.name}
+                        width="100%"
+                        height={{ base: "250px", md: "225px" }}
+                        objectFit="cover"
+                        borderRadius="16px"
+                        marginBottom="15px"
+                        fallback={
+                          <Box
+                            height={{ base: "250px", md: "225px" }}
+                            bg="#eff6ff"
+                            borderRadius="16px"
+                            marginBottom="15px"
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="center"
+                            fontSize={{ base: "48px", md: "56px" }}
+                            fontWeight="700"
+                            color="#2563eb"
+                          >
+                            {getInitials(member.name)}
+                          </Box>
+                        }
+                      />
+                    ) : (
+                      <Box
+                        height={{ base: "250px", md: "225px" }}
+                        bg="#eff6ff"
+                        borderRadius="16px"
+                        marginBottom="15px"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        fontSize={{ base: "48px", md: "56px" }}
+                        fontWeight="700"
+                        color="#2563eb"
+                      >
+                        {getInitials(member.name)}
+                      </Box>
+                    )}
 
                     <Heading
                       as="h3"
@@ -840,20 +881,20 @@ function About() {
               </Text>
             </Box>
 
-           <Button
-  as={RouterLink}
-  to="/careers"
-  background="#101828"
-  color="#ffffff"
-  borderRadius="30px"
-  paddingX="22px"
-  height="36px"
-  fontSize="13px"
-  flexShrink="0"
-  _hover={{ background: "#263247" }}
->
-  See Open Roles
-</Button>
+            <Button
+              as={RouterLink}
+              to="/careers"
+              background="#101828"
+              color="#ffffff"
+              borderRadius="30px"
+              paddingX="22px"
+              height="36px"
+              fontSize="13px"
+              flexShrink="0"
+              _hover={{ background: "#263247" }}
+            >
+              See Open Roles
+            </Button>
           </Flex>
         </Container>
       </Box>

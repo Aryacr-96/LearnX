@@ -352,7 +352,7 @@ export default function TestimonialList() {
                         name="name"
                         value={form.name}
                         onChange={changeField}
-                        placeholder="e.g. John Doe"
+                        // placeholder="e.g. John Doe"
                         borderRadius="10px"
                         required
                       />

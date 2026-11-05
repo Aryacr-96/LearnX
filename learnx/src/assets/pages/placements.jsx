@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 
 import {
@@ -14,8 +15,7 @@ import {
 import Header from "../components/header";
 import Footer from "../components/footer";
 
-// Replace this with your actual Django backend URL (e.g., http://127.0.0.1:8000)
-const BACKEND_URL = "http://localhost:8000"; 
+const BACKEND_URL = "http://localhost:8000";
 
 const placementCompanies = [
   {
@@ -48,16 +48,20 @@ function Placements() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch students from Django API
+  // Track images that fail to load
+  const [failedImages, setFailedImages] = useState([]);
+
+  // Fetch placement students from Django API
   useEffect(() => {
-    // Ensure this matches your urls.py path
-    fetch(`${BACKEND_URL}/api/placements/`) 
+    fetch(`${BACKEND_URL}/api/placements/`)
       .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch placements");
+        if (!res.ok) {
+          throw new Error("Failed to fetch placements");
+        }
         return res.json();
       })
       .then((data) => {
-        setStudents(data);
+        setStudents(Array.isArray(data) ? data : data.results || []);
         setLoading(false);
       })
       .catch((err) => {
@@ -66,11 +70,22 @@ function Placements() {
       });
   }, []);
 
-  // Helper to ensure Django image URLs work properly
+  // Get backend image URL
   const getImageUrl = (imagePath) => {
     if (!imagePath) return "";
-    if (imagePath.startsWith("http")) return imagePath;
-    return `${BACKEND_URL}${imagePath}`;
+
+    if (imagePath.startsWith("http")) {
+      return imagePath;
+    }
+
+    return `${BACKEND_URL}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
+  };
+
+  // Handle image loading failure
+  const handleImageError = (studentId) => {
+    setFailedImages((prev) =>
+      prev.includes(studentId) ? prev : [...prev, studentId]
+    );
   };
 
   return (
@@ -132,7 +147,7 @@ function Placements() {
             </Text>
           </Box>
 
-          {/* PLACED STUDENTS (Dynamic) */}
+          {/* PLACED STUDENTS */}
           <Box marginBottom="60px">
             <Heading
               as="h2"
@@ -144,13 +159,15 @@ function Placements() {
               Placed Students
             </Heading>
 
-            {/* Loading State */}
+            {/* LOADING STATE */}
             {loading ? (
               <Flex justify="center" align="center" minHeight="200px">
                 <Spinner size="xl" color="blue.500" />
               </Flex>
             ) : students.length === 0 ? (
-              <Text color="gray.500">No placements added yet.</Text>
+              <Text color="gray.500">
+                No placements added yet.
+              </Text>
             ) : (
               <Grid
                 templateColumns={{
@@ -181,25 +198,41 @@ function Placements() {
                       transform: "translateY(-3px)",
                     }}
                   >
-                    {/* STUDENT IMAGE */}
-                    <Image
-                      src={getImageUrl(student.image)}
-                      alt={student.name}
-                      width="122px"
-                      height="122px"
-                      borderRadius="50%"
-                      objectFit="cover"
-                      border="4px solid #edf2f7"
-                      marginBottom="15px"
-                      fallback={
-                        <Box
-                          width="122px"
-                          height="122px"
-                          borderRadius="50%"
-                          background="#e2e8f0"
-                        />
-                      }
-                    />
+                    {/* STUDENT IMAGE / PLACEHOLDER */}
+                    {student.image && !failedImages.includes(student.id) ? (
+                      <Image
+                        src={getImageUrl(student.image)}
+                        alt={student.name || "Student"}
+                        width="122px"
+                        height="122px"
+                        borderRadius="50%"
+                        objectFit="cover"
+                        border="4px solid #edf2f7"
+                        marginBottom="15px"
+                        onError={() => handleImageError(student.id)}
+                      />
+                    ) : (
+                      <Flex
+                        width="122px"
+                        height="122px"
+                        borderRadius="50%"
+                        background="#e2e8f0"
+                        border="4px solid #edf2f7"
+                        marginBottom="15px"
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <Text
+                          fontSize="35px"
+                          fontWeight="700"
+                          color="#94a3b8"
+                        >
+                          {student.name
+                            ? student.name.charAt(0).toUpperCase()
+                            : "?"}
+                        </Text>
+                      </Flex>
+                    )}
 
                     {/* STUDENT NAME */}
                     <Heading
@@ -236,7 +269,7 @@ function Placements() {
             )}
           </Box>
 
-          {/* PLACEMENT COMPANIES (Hardcoded) */}
+          {/* PLACEMENT COMPANIES */}
           <Box>
             <Heading
               as="h2"

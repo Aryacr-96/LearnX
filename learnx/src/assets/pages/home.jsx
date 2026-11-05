@@ -140,9 +140,11 @@ function AboutImages() {
     </Flex>
   );
 }
-
 function TechCard({ image, label }) {
   const [hovered, setHovered] = React.useState(false);
+  const [imageError, setImageError] = React.useState(false);
+
+  const hasImage = image && image.trim() !== "" && !imageError;
 
   return (
     <Box
@@ -156,16 +158,34 @@ function TechCard({ image, label }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <Image
-        src={image}
-        alt={label}
-        width="100%"
-        height="100%"
-        objectFit="cover"
-        transform={hovered ? "scale(1.06)" : "scale(1)"}
-        transition="transform 0.4s ease"
-        fallback={<Box width="100%" height="100%" bg="gray.200" />}
-      />
+      {hasImage ? (
+        <Image
+          src={image}
+          alt={label}
+          width="100%"
+          height="100%"
+          objectFit="cover"
+          transform={hovered ? "scale(1.06)" : "scale(1)"}
+          transition="transform 0.4s ease"
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        <Flex
+          width="100%"
+          height="100%"
+          bg="#F1F5F9"
+          align="center"
+          justify="center"
+          direction="column"
+          gap="12px"
+          color="#94A3B8"
+        >
+          <FiImage size={40} />
+          <Text fontSize="14px" fontWeight="500">
+            No Image Available
+          </Text>
+        </Flex>
+      )}
 
       <Box
         position="absolute"

@@ -48,11 +48,11 @@ const sections = [
       { label: "Placements", path: "/admin/placements", icon: FiBriefcase },
       { label: "Our Team", path: "/admin/team", icon: FiUserCheck },
       { label: "Careers", path: "/admin/careers", icon: FiCheckSquare },
-      {
-        label: "Website Content",
-        path: "/admin/website-content",
-        icon: FiFileText,
-      },
+      // {
+      //   label: "Website Content",
+      //   path: "/admin/website-content",
+      //   icon: FiFileText,
+      // },
     ],
   },
   {

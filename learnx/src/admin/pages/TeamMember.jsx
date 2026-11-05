@@ -442,7 +442,7 @@ export default function TeamMember() {
                         name="name"
                         value={form.name}
                         onChange={changeField}
-                        placeholder="e.g. Aarav Sharma"
+                        
                         borderRadius="10px"
                         size="lg"
                         required
