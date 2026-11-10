@@ -15,9 +15,7 @@ load_dotenv(BASE_DIR / '.env')
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-replace-me-later')
 DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 't')
 
-# Localhost setup (commented out):
-# ALLOWED_HOSTS = []
-
+# Hosts
 ALLOWED_HOSTS = [
     'demo2.appziatec.in',
     'localhost',
@@ -38,7 +36,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    
 
     'adminlearn',
 ]
@@ -79,21 +76,12 @@ WSGI_APPLICATION = 'backendlearnx.wsgi.application'
 
 
 # Database
-# SQLite setup (commented out):
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-# MySQL Database setup from .env
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.getenv('DB_NAME', 'LearnX'),
         'USER': os.getenv('DB_USER', 'root'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'akshaytr'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'root'),
         'HOST': os.getenv('DB_HOST', '127.0.0.1'),
         'PORT': os.getenv('DB_PORT', '3306'),
         'OPTIONS': {
@@ -141,11 +129,11 @@ CKEDITOR_UPLOAD_PATH = 'uploads/'
 
 CKEDITOR_CONFIGS = {
     'default': {
-        'toolbar': 'Full',  # This loads all the available buttons
+        'toolbar': 'Full',
         'height': 500,
         'width': '100%',
         'extraPlugins': ','.join([
-            'uploadimage', # Allows image uploads
+            'uploadimage',
             'div',
             'autolink',
             'autoembed',
@@ -157,10 +145,10 @@ CKEDITOR_CONFIGS = {
             'dialog',
             'dialogui',
             'elementspath',
-            'codesnippet', # Adds the "Insert Code Snippet" button
-            'colorbutton', # Adds Text Color and Background Color
-            'font',        # Adds Font Family and Font Size
-            'justify',     # Adds text alignment (left, center, right)
+            'codesnippet',
+            'colorbutton',
+            'font',
+            'justify',
         ]),
     },
 }
@@ -173,13 +161,32 @@ MAILERS = {
 }
 
 
-# React development server & hosted backend access
-# Localhost setup (commented out):
-# CORS_ALLOWED_ORIGINS = [
-#     'http://localhost:5173',
-#     'http://127.0.0.1:5173',
-# ]
+# ---------------------------------------------------------------------------
+# Django REST Framework
+# ---------------------------------------------------------------------------
+REST_FRAMEWORK = {
+    # Recognize token auth (frontend must send: Authorization: Token <token>)
+    # and session auth (admin/browsable API).
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    # Public reads, authenticated writes.
+    # - GET/HEAD/OPTIONS  -> allowed for everyone
+    # - POST/PUT/PATCH/DELETE -> require authentication (401 otherwise)
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    # Support file uploads (multipart) and JSON by default.
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.MultiPartParser',
+        'rest_framework.parsers.FormParser',
+    ],
+}
 
+
+# React development server & hosted backend access
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
