@@ -17,7 +17,7 @@ DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 't')
 
 # Hosts
 ALLOWED_HOSTS = [
-    'demo2.appziatec.in',
+    'demo2.appziatec.in','admin.appziatec.in',
     'localhost',
     '127.0.0.1',
     '*',
@@ -191,12 +191,14 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'https://demo2.appziatec.in',
+    'https://admin.appziatec.in',
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_TRUSTED_ORIGINS = [
     'https://demo2.appziatec.in',
+    'https://admin.appziatec.in',
     'http://localhost:5173',
     'http://127.0.0.1:5173',
 ]
