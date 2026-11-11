@@ -648,63 +648,99 @@ function Home() {
       </Container>
 
       {/* CERTIFICATES */}
-      <Container
-        maxWidth="1470px"
-        paddingX={pagePadding}
-        py={{ base: "60px", md: "90px" }}
-      >
-        <SectionLabel>CERTIFICATES</SectionLabel>
+      {/* CERTIFICATES */}
+<Container
+  maxWidth="1470px"
+  paddingX={pagePadding}
+  py={{ base: "60px", md: "90px" }}
+>
+  <SectionLabel>CERTIFICATES</SectionLabel>
 
-        <Heading
-          color="#262626"
-          fontSize={{ base: "30px", md: "36px" }}
-          mb="55px"
-        >
-          We Providing Certificates
-        </Heading>
+  <Heading
+    color="#262626"
+    fontSize={{ base: "30px", md: "36px" }}
+    mb={{ base: "30px", md: "55px" }}
+  >
+    We Provide Certificates
+  </Heading>
 
-        <Box width="100%" overflow="hidden" position="relative" py="15px">
-          <Box
-            display="flex"
-            width="max-content"
-            animation="certificateScroll 20s linear infinite"
-            _hover={{ animationPlayState: "paused" }}
+  <Box
+    width="100%"
+    overflow="hidden"
+    position="relative"
+    py="15px"
+    // Fade edges so the marquee looks clean on mobile
+    _before={{
+      content: '""',
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: { base: "25px", md: "60px" },
+      height: "100%",
+      background:
+        "linear-gradient(to right, white, rgba(255,255,255,0))",
+      zIndex: 2,
+      pointerEvents: "none",
+    }}
+    _after={{
+      content: '""',
+      position: "absolute",
+      top: 0,
+      right: 0,
+      width: { base: "25px", md: "60px" },
+      height: "100%",
+      background:
+        "linear-gradient(to left, white, rgba(255,255,255,0))",
+      zIndex: 2,
+      pointerEvents: "none",
+    }}
+  >
+    <Box
+      display="flex"
+      width="max-content"
+      animation="certificateScroll 20s linear infinite"
+      _hover={{ animationPlayState: "paused" }}
+    >
+      {[...certificateImages, ...certificateImages].map(
+        (company, index) => (
+          <Flex
+            key={`${company.name}-${index}`}
+            // Bigger on mobile so the logo is actually visible
+            width={{ base: "220px", sm: "260px", md: "300px" }}
+            height={{ base: "140px", sm: "170px", md: "190px" }}
+            align="center"
+            justify="center"
+            flexShrink={0}
+            px={{ base: "10px", md: "20px" }}
           >
-            {[...certificateImages, ...certificateImages].map(
-              (company, index) => (
-                <Flex
-                  key={`${company.name}-${index}`}
-                  width={{ base: "160px", md: "220px" }}
-                  height={{ base: "90px", md: "120px" }}
-                  align="center"
-                  justify="center"
-                  flexShrink={0}
-                  px="25px"
-                >
-                  <Image
-                    src={company.image}
-                    alt={company.name}
-                    width="100%"
-                    height="100%"
-                    maxWidth="200px"
-                    maxHeight="185px"
-                    objectFit="contain"
-                  />
-                </Flex>
-              )
-            )}
-          </Box>
-        </Box>
+            <Image
+              src={company.image}
+              alt={company.name}
+              width="100%"
+              height="100%"
+              // Let it grow into the bigger tile
+              maxWidth={{ base: "200px", md: "260px" }}
+              maxHeight={{ base: "120px", md: "170px" }}
+              objectFit="contain"
+            />
+          </Flex>
+        )
+      )}
+    </Box>
+  </Box>
 
-        <style>
-          {`
-            @keyframes certificateScroll {
-              from { transform: translateX(0); }
-              to { transform: translateX(-50%); }
-            }
-          `}
-        </style>
-      </Container>
+  <style>
+    {`
+      @keyframes certificateScroll {
+        from { transform: translateX(0); }
+        to { transform: translateX(-50%); }
+      }
+      @media (max-width: 768px) {
+        /* Slow it slightly on mobile so it's readable */
+      }
+    `}
+  </style>
+</Container>
 
       {/* TESTIMONIALS */}
       <Box
