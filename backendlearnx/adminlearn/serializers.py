@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Blog, CallbackRequest, Career, ContactMessage, Course, Gallery, HireEnquiry, PlacementStudent, TeamMember, Technology, Testimonial
+from .models import Blog, CallbackRequest, Career, ContactMessage, Course, Gallery, HireEnquiry, PlacementStudent, SiteSettings, TeamMember, Technology, Testimonial, PageSEO
 
 
 class BlogSerializer(serializers.ModelSerializer):
@@ -8,25 +8,9 @@ class BlogSerializer(serializers.ModelSerializer):
     class Meta:
         model = Blog
         fields = [
-            'id',
-            'title',
-            'slug',
-            'image',
-            'uploaded_at',
-            'views',
-            'description',
-            'meta_title',
-            'meta_description',
-            'meta_keywords',
+            'id', 'title', 'slug', 'image', 'uploaded_at', 'views', 'description',
         ]
-
-        read_only_fields = [
-            'id',
-            'slug',
-            'uploaded_at',
-            'views',
-        ]
-
+        read_only_fields = ['id', 'slug', 'uploaded_at', 'views']
 
 
 class GallerySerializer(serializers.ModelSerializer):
@@ -36,10 +20,7 @@ class GallerySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Gallery
-        fields = [
-            "id", "title", "image", "video", "youtube_url", "uploaded_at",
-            "meta_title", "meta_description", "meta_keywords",
-        ]
+        fields = ["id", "title", "image", "video", "youtube_url", "uploaded_at"]
         read_only_fields = ["id", "uploaded_at"]
 
 
@@ -50,16 +31,10 @@ class ContactMessageSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "submitted_at", "is_read"]
 
 
-# ---------------------------------------------------------------------------
-# Placement Students Serializer
-# ---------------------------------------------------------------------------
 class PlacementStudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlacementStudent
-        fields = [
-            'id', 'name', 'role', 'batch', 'image', 'order',
-            'meta_title', 'meta_description', 'meta_keywords',
-        ]
+        fields = ['id', 'name', 'role', 'batch', 'image', 'order']
 
 
 class TeamMemberSerializer(serializers.ModelSerializer):
@@ -76,29 +51,19 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'slug', 'image', 'duration', 'level',
             'description', 'overview', 'modules', 'order',
-            'meta_title', 'meta_description', 'meta_keywords',
         ]
         read_only_fields = ['slug']
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         request = self.context.get('request')
-
         if instance.image:
-            representation['image'] = (
-                request.build_absolute_uri(instance.image.url)
-                if request else instance.image.url
-            )
+            representation['image'] = request.build_absolute_uri(instance.image.url) if request else instance.image.url
         else:
             representation['image'] = None
-
         return representation
 
 
-
-# ---------------------------------------------------------------------------
-# Technology Serializer (FIXED INDENTATION)
-# ---------------------------------------------------------------------------
 class TechnologySerializer(serializers.ModelSerializer):
     image = serializers.ImageField(required=False, allow_null=True)
 
@@ -109,23 +74,13 @@ class TechnologySerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         request = self.context.get('request')
-        
         if instance.image:
-            if request:
-                representation['image'] = request.build_absolute_uri(instance.image.url)
-            else:
-                representation['image'] = instance.image.url
+            representation['image'] = request.build_absolute_uri(instance.image.url) if request else instance.image.url
         else:
             representation['image'] = None
-            
         return representation
 
 
-
-
-# ---------------------------------------------------------------------------
-# Testimonials Serializer (FIXED INDENTATION)
-# ---------------------------------------------------------------------------
 class TestimonialSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(required=False, allow_null=True)
 
@@ -136,17 +91,11 @@ class TestimonialSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         request = self.context.get('request')
-        
         if instance.image:
-            if request:
-                representation['image'] = request.build_absolute_uri(instance.image.url)
-            else:
-                representation['image'] = instance.image.url
+            representation['image'] = request.build_absolute_uri(instance.image.url) if request else instance.image.url
         else:
             representation['image'] = None
-            
         return representation
-
 
 
 class HireEnquirySerializer(serializers.ModelSerializer):
@@ -162,11 +111,9 @@ class CareerSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'category', 'title', 'experience', 
             'description', 'responsibilities', 'requirements', 
-            'order', 'applications', 
-            'meta_title', 'meta_description', 'meta_keywords'
+            'order', 'applications'
         ]
         read_only_fields = ["applications"]
-
 
 
 class CallbackRequestSerializer(serializers.ModelSerializer):
@@ -174,3 +121,18 @@ class CallbackRequestSerializer(serializers.ModelSerializer):
         model = CallbackRequest
         fields = "__all__"
         read_only_fields = ["id", "submitted_at", "is_read"]
+
+
+class PageSEOSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PageSEO
+        fields = "__all__"
+
+
+
+
+
+class SiteSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SiteSettings
+        fields = '__all__'

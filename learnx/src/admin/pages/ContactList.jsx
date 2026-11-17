@@ -146,11 +146,11 @@ export default function ContactList() {
                 boxShadow={msg.is_read ? "sm" : "md"}
                 transition="all .2s ease"
               >
-                {!msg.is_read && (
+                {/* {!msg.is_read && (
                   <Badge position="absolute" top="20px" right="20px" bg="#4545A5" color="white" borderRadius="full">
                     New
                   </Badge>
-                )}
+                )} */}
 
                 <Heading size="sm" color="#20243A" mb="4px" pr="60px">
                   {msg.subject}

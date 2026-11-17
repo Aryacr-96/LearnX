@@ -1,25 +1,18 @@
+// ==============================================================================
+// 🔴 LOCAL TESTING MODE
+// Once login works locally, you can switch these back to use import.meta.env
+// ==============================================================================
+export const BACKEND_BASE_URL = "http://127.0.0.1:8000";
+export const API_BASE_URL = "http://127.0.0.1:8000/api";
 
-// Localhost setup (commented out):
-// export const BACKEND_BASE_URL = "http://127.0.0.1:8000";
-// export const API_BASE_URL = "http://127.0.0.1:8000/api";
-
-// Dynamic URLs reading from .env
-export const BACKEND_BASE_URL = (
-  import.meta.env.VITE_MEDIA_BASE_URL || "http://127.0.0.1:8000"
-).replace(/\/+$/, "");
-
-export const API_BASE_URL = `${(
-  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000"
-).replace(/\/+$/, "")}/api`;
+// When you are ready to go live, comment out the two lines above, and uncomment these:
+// export const BACKEND_BASE_URL = (import.meta.env.VITE_MEDIA_BASE_URL || "http://127.0.0.1:8000").replace(/\/+$/, "");
+// export const API_BASE_URL = `${(import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000").replace(/\/+$/, "")}/api`;
 
 export const resolveImageUrl = (url) => {
   if (!url) return null;
-
-  // If it is already a full URL, return it
   if (url.startsWith("http")) return url;
-
   const cleanPath = url.startsWith("/") ? url : `/${url}`;
-
   return `${BACKEND_BASE_URL}${cleanPath}`;
 };
 
@@ -34,7 +27,6 @@ async function publicRequest(endpoint) {
     if (response.status === 404) {
       throw new Error("Not found");
     }
-
     throw new Error(data.detail || "Request failed.");
   }
 
@@ -45,7 +37,6 @@ async function publicRequest(endpoint) {
 
 export const getPublicBlogs = () => publicRequest("/blogs/");
 
-// IMPORTANT: Fetch blog details using slug
 export const getPublicBlog = (slug) =>
   publicRequest(`/blogs/slug/${encodeURIComponent(slug)}/`);
 
@@ -91,3 +82,8 @@ export const sendContactMessage = async (data) => {
 
   return responseData;
 };
+
+// ================= SETTINGS API =================
+
+// 👇 Added the missing function here
+export const getPublicSettings = () => publicRequest("/settings/");
