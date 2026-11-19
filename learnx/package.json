@@ -13,7 +13,7 @@
     "@chakra-ui/icons": "npm:chakra-ui-icons-compat@^3.0.0",
     "@chakra-ui/react": "^3.37.0",
     "@emotion/react": "^11.14.0",
-    "html-react-parser": "^6.1.9",
+    "html-react-parser": "^6.1.10",
     "lucide-react": "^1.50.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

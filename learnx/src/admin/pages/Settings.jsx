@@ -1,45 +1,167 @@
+
 import { useState, useEffect } from "react";
 import {
-  Box, Button, Heading, Input, Text, VStack, Textarea, Spinner, 
-  Flex, Icon, HStack, SimpleGrid, Dialog, Portal, CloseButton, 
-  IconButton
+  Box,
+  Button,
+  Heading,
+  Input,
+  Text,
+  VStack,
+  Textarea,
+  Spinner,
+  Flex,
+  Icon,
+  HStack,
+  SimpleGrid,
+  Dialog,
+  Portal,
+  CloseButton,
+  IconButton,
+  Separator,
+  Badge,
 } from "@chakra-ui/react";
-import { 
-  FiSave, FiFacebook, FiInstagram, FiLinkedin, FiYoutube, FiTwitter, 
-  FiMapPin, FiClock, FiMail, FiMap, FiEdit3, FiTrash2, FiHome, FiPlus
+
+import {
+  FiSave,
+  FiFacebook,
+  FiInstagram,
+  FiLinkedin,
+  FiYoutube,
+  FiTwitter,
+  FiMapPin,
+  FiClock,
+  FiMail,
+  FiEdit3,
+  FiTrash2,
+  FiHome,
+  FiPlus,
+  FiGlobe,
+  FiAlertTriangle,
 } from "react-icons/fi";
+
 import { toaster } from "../../App";
 import { apiRequest } from "../services/api";
 
-const FormField = ({ label, name, value, onChange, type = "text", isTextArea = false }) => (
-  <Box mb={4}>
-    <Text fontWeight="semibold" fontSize="sm" mb={2} color="gray.700">{label}</Text>
+const PRIMARY = "#4545A5";
+const PRIMARY_DARK = "#353584";
+const LIGHT_PURPLE = "#EEEEFB";
+const TEXT_DARK = "#20243A";
+const DANGER = "#DB2777";
+
+const FormField = ({
+  label,
+  name,
+  value,
+  onChange,
+  type = "text",
+  isTextArea = false,
+  placeholder = "",
+}) => (
+  <Box>
+    <Text fontWeight="600" fontSize="sm" mb={2} color="#34384D">
+      {label}
+    </Text>
+
     {isTextArea ? (
-      <Textarea name={name} value={value} onChange={onChange} bg="gray.50" borderRadius="lg" rows={3} _focus={{ bg: "white", borderColor: "purple.500" }} />
+      <Textarea
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        bg="gray.50"
+        border="1px solid"
+        borderColor="gray.200"
+        borderRadius="10px"
+        rows={3}
+        resize="vertical"
+        _hover={{ borderColor: "gray.300" }}
+        _focus={{
+          bg: "white",
+          borderColor: PRIMARY,
+          boxShadow: `0 0 0 1px ${PRIMARY}`,
+        }}
+      />
     ) : (
-      <Input name={name} type={type} value={value} onChange={onChange} bg="gray.50" borderRadius="lg" _focus={{ bg: "white", borderColor: "purple.500" }} />
+      <Input
+        name={name}
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        bg="gray.50"
+        border="1px solid"
+        borderColor="gray.200"
+        borderRadius="10px"
+        h="44px"
+        _hover={{ borderColor: "gray.300" }}
+        _focus={{
+          bg: "white",
+          borderColor: PRIMARY,
+          boxShadow: `0 0 0 1px ${PRIMARY}`,
+        }}
+      />
     )}
   </Box>
+);
+
+const SectionHeader = ({ icon, title, subtitle, color, bg }) => (
+  <HStack gap={3}>
+    <Flex
+      w="44px"
+      h="44px"
+      flexShrink={0}
+      borderRadius="12px"
+      bg={bg}
+      color={color}
+      align="center"
+      justify="center"
+    >
+      <Icon as={icon} boxSize={5} />
+    </Flex>
+
+    <Box>
+      <Heading size="sm" color={TEXT_DARK}>
+        {title}
+      </Heading>
+      <Text fontSize="xs" color="gray.500" mt="3px">
+        {subtitle}
+      </Text>
+    </Box>
+  </HStack>
 );
 
 export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
+
   const [formData, setFormData] = useState({
-    institute_name: "", email: "", phone: "", address: "",
-    working_hours: "", google_map_url: "", facebook_url: "",
-    instagram_url: "", linkedin_url: "", youtube_url: "", twitter_url: "",
+    institute_name: "",
+    email: "",
+    phone: "",
+    address: "",
+    working_hours: "",
+    google_map_url: "",
+    facebook_url: "",
+    instagram_url: "",
+    linkedin_url: "",
+    youtube_url: "",
+    twitter_url: "",
   });
 
-  const [editSection, setEditSection] = useState(null); 
+  const [editSection, setEditSection] = useState(null);
   const [deleteSection, setDeleteSection] = useState(null);
 
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         const data = await apiRequest("/settings/");
-        const settings = Array.isArray(data) ? data[0] : (data.results ? data.results[0] : data);
+
+        const settings = Array.isArray(data)
+          ? data[0]
+          : data.results
+            ? data.results[0]
+            : data;
+
         if (settings) {
           setFormData({
             institute_name: settings.institute_name || "",
@@ -56,67 +178,115 @@ export default function Settings() {
           });
         }
       } catch (err) {
-        toaster.create({ title: "Error loading settings", description: err.message, type: "error" });
+        toaster.create({
+          title: "Error loading settings",
+          description: err.message,
+          type: "error",
+        });
       } finally {
         setLoading(false);
       }
     };
+
     fetchSettings();
   }, []);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handlePhoneChange = (e) => {
-    const val = e.target.value.replace(/\D/g, ""); 
-    if (val.length <= 10) setFormData({ ...formData, phone: val });
+    const val = e.target.value.replace(/\D/g, "");
+
+    if (val.length <= 10) {
+      setFormData((prev) => ({
+        ...prev,
+        phone: val,
+      }));
+    }
   };
 
-  // 👇 Helper to clean the Google Maps URL (strips out <iframe> tags if pasted)
   const cleanMapUrl = (url) => {
     if (!url) return "";
-    // If it contains src="...", extract just the URL
+
     const match = url.match(/src="([^"]+)"/);
+
     return match ? match[1] : url;
   };
 
   const handleSave = async () => {
-    if (formData.phone && formData.phone.length !== 10) {
-      toaster.create({ title: "Invalid Phone", description: "Phone number must be exactly 10 digits.", type: "warning" });
+    if (
+      editSection === "institute" &&
+      formData.phone &&
+      formData.phone.length !== 10
+    ) {
+      toaster.create({
+        title: "Invalid Phone",
+        description: "Phone number must be exactly 10 digits.",
+        type: "warning",
+      });
       return;
     }
 
-    // 👇 Create a specific payload based on the section being edited
     let payload = {};
-    if (editSection === 'institute') {
-      payload = { institute_name: formData.institute_name, email: formData.email, phone: formData.phone };
-    } else if (editSection === 'address') {
-      payload = { address: formData.address, google_map_url: cleanMapUrl(formData.google_map_url) };
-    } else if (editSection === 'hours') {
-      payload = { working_hours: formData.working_hours };
-    } else if (editSection === 'social') {
-      payload = { 
-        facebook_url: formData.facebook_url, instagram_url: formData.instagram_url,
-        linkedin_url: formData.linkedin_url, youtube_url: formData.youtube_url, twitter_url: formData.twitter_url 
+
+    if (editSection === "institute") {
+      payload = {
+        institute_name: formData.institute_name,
+        email: formData.email,
+        phone: formData.phone,
+      };
+    } else if (editSection === "address") {
+      payload = {
+        address: formData.address,
+        google_map_url: cleanMapUrl(formData.google_map_url),
+      };
+    } else if (editSection === "hours") {
+      payload = {
+        working_hours: formData.working_hours,
+      };
+    } else if (editSection === "social") {
+      payload = {
+        facebook_url: formData.facebook_url,
+        instagram_url: formData.instagram_url,
+        linkedin_url: formData.linkedin_url,
+        youtube_url: formData.youtube_url,
+        twitter_url: formData.twitter_url,
       };
     }
 
     setSaving(true);
+
     try {
       await apiRequest("/settings/", {
-        method: "POST", 
-        body: JSON.stringify(payload), // Sends ONLY the edited section
+        method: "POST",
+        body: JSON.stringify(payload),
       });
-      
-      // Update local state so the UI reflects changes immediately
-      setFormData((prev) => ({ ...prev, ...payload }));
-      
-      toaster.create({ title: "Settings saved successfully!", type: "success" });
-      setEditSection(null); 
+
+      setFormData((prev) => ({
+        ...prev,
+        ...payload,
+      }));
+
+      toaster.create({
+        title: "Settings saved successfully!",
+        type: "success",
+      });
+
+      setEditSection(null);
     } catch (err) {
-      console.error("Backend Save Error:", err); 
-      toaster.create({ title: "Error saving", description: err.message, type: "error" });
+      console.error("Backend Save Error:", err);
+
+      toaster.create({
+        title: "Error saving settings",
+        description: err.message,
+        type: "error",
+      });
     } finally {
       setSaving(false);
     }
@@ -124,262 +294,945 @@ export default function Settings() {
 
   const handleDelete = async () => {
     const updatedData = { ...formData };
-    
-    if (deleteSection === 'institute') { updatedData.institute_name = ""; updatedData.email = ""; updatedData.phone = ""; }
-    if (deleteSection === 'address') { updatedData.address = ""; updatedData.google_map_url = ""; }
-    if (deleteSection === 'hours') { updatedData.working_hours = ""; }
-    if (deleteSection === 'social') { 
-      updatedData.facebook_url = ""; updatedData.instagram_url = ""; 
-      updatedData.linkedin_url = ""; updatedData.youtube_url = ""; updatedData.twitter_url = ""; 
+    let payload = {};
+
+    if (deleteSection === "institute") {
+      updatedData.institute_name = "";
+      updatedData.email = "";
+      updatedData.phone = "";
+
+      payload = {
+        institute_name: "",
+        email: "",
+        phone: "",
+      };
     }
 
-    // Send only the cleared fields for that section
-    let payload = {};
-    if (deleteSection === 'institute') payload = { institute_name: "", email: "", phone: "" };
-    if (deleteSection === 'address') payload = { address: "", google_map_url: "" };
-    if (deleteSection === 'hours') payload = { working_hours: "" };
-    if (deleteSection === 'social') payload = { facebook_url: "", instagram_url: "", linkedin_url: "", youtube_url: "", twitter_url: "" };
+    if (deleteSection === "address") {
+      updatedData.address = "";
+      updatedData.google_map_url = "";
+
+      payload = {
+        address: "",
+        google_map_url: "",
+      };
+    }
+
+    if (deleteSection === "hours") {
+      updatedData.working_hours = "";
+
+      payload = {
+        working_hours: "",
+      };
+    }
+
+    if (deleteSection === "social") {
+      updatedData.facebook_url = "";
+      updatedData.instagram_url = "";
+      updatedData.linkedin_url = "";
+      updatedData.youtube_url = "";
+      updatedData.twitter_url = "";
+
+      payload = {
+        facebook_url: "",
+        instagram_url: "",
+        linkedin_url: "",
+        youtube_url: "",
+        twitter_url: "",
+      };
+    }
 
     setSaving(true);
+
     try {
       await apiRequest("/settings/", {
         method: "POST",
         body: JSON.stringify(payload),
       });
+
       setFormData(updatedData);
-      toaster.create({ title: "Section deleted successfully", type: "info" });
+
+      toaster.create({
+        title: "Section deleted successfully",
+        type: "success",
+      });
+
       setDeleteSection(null);
     } catch (err) {
       console.error("Backend Delete Error:", err);
-      toaster.create({ title: "Error deleting", description: err.message, type: "error" });
+
+      toaster.create({
+        title: "Error deleting section",
+        description: err.message,
+        type: "error",
+      });
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <Flex justify="center" py={20}><Spinner size="xl" color="purple.500" /></Flex>;
+  const sectionNames = {
+    institute: "Institute Info",
+    address: "Location",
+    hours: "Working Hours",
+    social: "Social Media",
+  };
+
+  const hasSocialLinks =
+    formData.facebook_url ||
+    formData.instagram_url ||
+    formData.linkedin_url ||
+    formData.youtube_url ||
+    formData.twitter_url;
+
+  const socialItems = [
+    {
+      key: "facebook_url",
+      icon: FiFacebook,
+      label: "Facebook",
+      color: "#1877F2",
+    },
+    {
+      key: "instagram_url",
+      icon: FiInstagram,
+      label: "Instagram",
+      color: "#E1306C",
+    },
+    {
+      key: "linkedin_url",
+      icon: FiLinkedin,
+      label: "LinkedIn",
+      color: "#0A66C2",
+    },
+    {
+      key: "youtube_url",
+      icon: FiYoutube,
+      label: "YouTube",
+      color: "#FF0000",
+    },
+    {
+      key: "twitter_url",
+      icon: FiTwitter,
+      label: "Twitter / X",
+      color: "#1DA1F2",
+    },
+  ];
+
+  const renderCardActions = (section, hasData) => (
+    <HStack gap={2}>
+      <IconButton
+        size="sm"
+        variant="ghost"
+        aria-label={hasData ? "Edit section" : "Add section"}
+        color={PRIMARY}
+        borderRadius="9px"
+        onClick={() => setEditSection(section)}
+        _hover={{ bg: LIGHT_PURPLE }}
+      >
+        <Icon as={hasData ? FiEdit3 : FiPlus} boxSize={4} />
+      </IconButton>
+
+      <IconButton
+        size="sm"
+        variant="ghost"
+        aria-label="Delete section"
+        color={DANGER}
+        borderRadius="9px"
+        disabled={!hasData}
+        onClick={() => setDeleteSection(section)}
+        _hover={{ bg: "#FDECF3" }}
+      >
+        <Icon as={FiTrash2} boxSize={4} />
+      </IconButton>
+    </HStack>
+  );
+
+  const renderInfo = (label, value, icon) => (
+    <HStack align="start" gap={3}>
+      {icon && (
+        <Flex
+          w="32px"
+          h="32px"
+          borderRadius="9px"
+          bg="gray.50"
+          color="gray.500"
+          align="center"
+          justify="center"
+          flexShrink={0}
+        >
+          <Icon as={icon} boxSize={4} />
+        </Flex>
+      )}
+
+      <Box minW={0} flex="1">
+        <Text fontSize="xs" color="gray.500" mb="3px">
+          {label}
+        </Text>
+        <Text
+          fontSize="sm"
+          fontWeight="600"
+          color={value ? TEXT_DARK : "gray.400"}
+          wordBreak="break-word"
+        >
+          {value || "Not added yet"}
+        </Text>
+      </Box>
+    </HStack>
+  );
+
+  if (loading) {
+    return (
+      <Flex justify="center" align="center" minH="400px">
+        <VStack gap={3}>
+          <Spinner size="xl" color={PRIMARY} />
+          <Text color="gray.500" fontSize="sm">
+            Loading website settings...
+          </Text>
+        </VStack>
+      </Flex>
+    );
+  }
 
   return (
-    <Box maxW="1200px" mx="auto">
-      
-      <Flex justify="space-between" align="center" mb={8} wrap="wrap" gap={4}>
+    <VStack align="stretch" gap="24px">
+      {/* Page Header */}
+      <Flex
+        justify="space-between"
+        align={{ base: "stretch", md: "center" }}
+        direction={{ base: "column", md: "row" }}
+        gap={4}
+      >
         <Box>
-          <Heading size="lg" color="#20243A">Website Settings</Heading>
-          <Text color="gray.500" mt={1}>Manage your institute's information in separate cards.</Text>
+          <HStack gap={3}>
+            <Flex
+              w="46px"
+              h="46px"
+              borderRadius="13px"
+              bg={LIGHT_PURPLE}
+              color={PRIMARY}
+              align="center"
+              justify="center"
+            >
+              <Icon as={FiGlobe} boxSize={6} />
+            </Flex>
+
+            <Box>
+              <Heading size="lg" color={TEXT_DARK}>
+                Website Settings
+              </Heading>
+
+              <Text color="gray.500" fontSize="sm" mt="4px">
+                Manage your institute information and website links.
+              </Text>
+            </Box>
+          </HStack>
         </Box>
-        <Button colorPalette="purple" onClick={() => setEditSection('institute')} px={6} borderRadius="lg" shadow="sm">
-          <FiPlus /> Add New Info
+
+        <Button
+          bg={PRIMARY}
+          color="white"
+          borderRadius="10px"
+          h="44px"
+          px={5}
+          fontWeight="600"
+          onClick={() => setEditSection("institute")}
+          _hover={{ bg: PRIMARY_DARK }}
+        >
+          <FiPlus />
+          Add New Info
         </Button>
       </Flex>
 
-      <SimpleGrid columns={{ base: 1, md: 2 }} gap={6}>
-        
-        {/* 1. Institute Info Card */}
-        <Box bg="white" p={6} borderRadius="2xl" border="1px solid" borderColor="gray.200" boxShadow="sm">
-          <Flex justify="space-between" align="flex-start" mb={4}>
-            <HStack gap={3}>
-              <Flex w={10} h={10} borderRadius="lg" bg="purple.50" color="purple.600" align="center" justify="center"><FiHome size={20} /></Flex>
-              <Box>
-                <Heading size="sm" color="gray.800">Institute Info</Heading>
-                <Text fontSize="xs" color="gray.500">Name, Email & Phone</Text>
-              </Box>
-            </HStack>
-            <HStack gap={1}>
-              <IconButton size="sm" variant="ghost" aria-label="Edit" onClick={() => setEditSection('institute')}>
-                {(!formData.institute_name && !formData.email && !formData.phone) ? <FiPlus /> : <FiEdit3 />}
-              </IconButton>
-              <IconButton size="sm" variant="ghost" colorPalette="red" aria-label="Delete" onClick={() => setDeleteSection('institute')}><FiTrash2 /></IconButton>
-            </HStack>
+      {/* Settings Cards */}
+      <SimpleGrid columns={{ base: 1, md: 2 }} gap={5}>
+        {/* Institute Information */}
+        <Box
+          bg="white"
+          p={{ base: 5, md: 6 }}
+          borderRadius="18px"
+          border="1px solid"
+          borderColor="gray.200"
+          boxShadow="0 3px 14px rgba(0,0,0,0.035)"
+          transition="all .2s"
+          _hover={{ boxShadow: "0 6px 22px rgba(0,0,0,0.06)" }}
+        >
+          <Flex justify="space-between" align="start" mb={5}>
+            <SectionHeader
+              icon={FiHome}
+              title="Institute Info"
+              subtitle="Name, email and phone"
+              color={PRIMARY}
+              bg={LIGHT_PURPLE}
+            />
+
+            {renderCardActions(
+              "institute",
+              !!(
+                formData.institute_name ||
+                formData.email ||
+                formData.phone
+              )
+            )}
           </Flex>
-          <VStack align="stretch" gap={3}>
-            <Box><Text fontSize="xs" color="gray.400">Institute Name</Text><Text fontWeight="medium">{formData.institute_name || "—"}</Text></Box>
-            <Box><Text fontSize="xs" color="gray.400">Email</Text><Text fontWeight="medium">{formData.email || "—"}</Text></Box>
-            <Box><Text fontSize="xs" color="gray.400">Phone</Text><Text fontWeight="medium">{formData.phone || "—"}</Text></Box>
+
+          <Separator borderColor="gray.100" mb={5} />
+
+          <VStack align="stretch" gap={4}>
+            {renderInfo("Institute Name", formData.institute_name)}
+            {renderInfo("Email Address", formData.email, FiMail)}
+            {renderInfo("Phone Number", formData.phone)}
           </VStack>
         </Box>
 
-        {/* 2. Location & Map Card */}
-        <Box bg="white" p={6} borderRadius="2xl" border="1px solid" borderColor="gray.200" boxShadow="sm">
-          <Flex justify="space-between" align="flex-start" mb={4}>
-            <HStack gap={3}>
-              <Flex w={10} h={10} borderRadius="lg" bg="blue.50" color="blue.600" align="center" justify="center"><FiMapPin size={20} /></Flex>
-              <Box>
-                <Heading size="sm" color="gray.800">Location</Heading>
-                <Text fontSize="xs" color="gray.500">Address & Google Map</Text>
-              </Box>
-            </HStack>
-            <HStack gap={1}>
-              <IconButton size="sm" variant="ghost" aria-label="Edit" onClick={() => setEditSection('address')}>
-                {(!formData.address && !formData.google_map_url) ? <FiPlus /> : <FiEdit3 />}
-              </IconButton>
-              <IconButton size="sm" variant="ghost" colorPalette="red" aria-label="Delete" onClick={() => setDeleteSection('address')}><FiTrash2 /></IconButton>
-            </HStack>
+        {/* Location */}
+        <Box
+          bg="white"
+          p={{ base: 5, md: 6 }}
+          borderRadius="18px"
+          border="1px solid"
+          borderColor="gray.200"
+          boxShadow="0 3px 14px rgba(0,0,0,0.035)"
+          transition="all .2s"
+          _hover={{ boxShadow: "0 6px 22px rgba(0,0,0,0.06)" }}
+        >
+          <Flex justify="space-between" align="start" mb={5}>
+            <SectionHeader
+              icon={FiMapPin}
+              title="Location"
+              subtitle="Address and Google Maps"
+              color="#2563EB"
+              bg="#EFF6FF"
+            />
+
+            {renderCardActions(
+              "address",
+              !!(formData.address || formData.google_map_url)
+            )}
           </Flex>
-          <VStack align="stretch" gap={3}>
-            <Box><Text fontSize="xs" color="gray.400">Address</Text><Text fontWeight="medium">{formData.address || "—"}</Text></Box>
-            {formData.google_map_url && (
-              <Box h="120px" borderRadius="lg" overflow="hidden" border="1px solid" borderColor="gray.200">
-                <iframe src={cleanMapUrl(formData.google_map_url)} width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy" />
+
+          <Separator borderColor="gray.100" mb={5} />
+
+          <VStack align="stretch" gap={4}>
+            {renderInfo("Institute Address", formData.address, FiMapPin)}
+
+            {formData.google_map_url ? (
+              <Box>
+                <HStack justify="space-between" mb={2}>
+                  <Text fontSize="xs" color="gray.500" fontWeight="600">
+                    GOOGLE MAP PREVIEW
+                  </Text>
+                  <Badge
+                    bg="#EFF6FF"
+                    color="#2563EB"
+                    borderRadius="full"
+                    px={2}
+                  >
+                    Map added
+                  </Badge>
+                </HStack>
+
+                <Box
+                  h="145px"
+                  borderRadius="12px"
+                  overflow="hidden"
+                  border="1px solid"
+                  borderColor="gray.200"
+                  bg="gray.50"
+                >
+                  <iframe
+                    src={cleanMapUrl(formData.google_map_url)}
+                    title="Institute location map"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                  />
+                </Box>
+              </Box>
+            ) : (
+              <Box
+                bg="gray.50"
+                border="1px dashed"
+                borderColor="gray.300"
+                borderRadius="12px"
+                py={5}
+                textAlign="center"
+              >
+                <Icon as={FiMapPin} color="gray.400" boxSize={6} mb={2} />
+                <Text color="gray.500" fontSize="sm">
+                  Google Map not added yet
+                </Text>
               </Box>
             )}
           </VStack>
         </Box>
 
-        {/* 3. Working Hours Card */}
-        <Box bg="white" p={6} borderRadius="2xl" border="1px solid" borderColor="gray.200" boxShadow="sm">
-          <Flex justify="space-between" align="flex-start" mb={4}>
-            <HStack gap={3}>
-              <Flex w={10} h={10} borderRadius="lg" bg="orange.50" color="orange.600" align="center" justify="center"><FiClock size={20} /></Flex>
-              <Box>
-                <Heading size="sm" color="gray.800">Working Hours</Heading>
-                <Text fontSize="xs" color="gray.500">Institute timings</Text>
+        {/* Working Hours */}
+        <Box
+          bg="white"
+          p={{ base: 5, md: 6 }}
+          borderRadius="18px"
+          border="1px solid"
+          borderColor="gray.200"
+          boxShadow="0 3px 14px rgba(0,0,0,0.035)"
+          transition="all .2s"
+          _hover={{ boxShadow: "0 6px 22px rgba(0,0,0,0.06)" }}
+        >
+          <Flex justify="space-between" align="start" mb={5}>
+            <SectionHeader
+              icon={FiClock}
+              title="Working Hours"
+              subtitle="Institute timings"
+              color="#EA580C"
+              bg="#FFF7ED"
+            />
+
+            {renderCardActions("hours", !!formData.working_hours)}
+          </Flex>
+
+          <Separator borderColor="gray.100" mb={5} />
+
+          <Box
+            bg="#FFF7ED"
+            borderRadius="12px"
+            p={5}
+            minH="95px"
+          >
+            <HStack align="start" gap={3}>
+              <Flex
+                w="36px"
+                h="36px"
+                borderRadius="10px"
+                bg="white"
+                color="#EA580C"
+                align="center"
+                justify="center"
+              >
+                <Icon as={FiClock} boxSize={5} />
+              </Flex>
+
+              <Box flex="1">
+                <Text fontSize="xs" color="gray.500" mb={1}>
+                  BUSINESS HOURS
+                </Text>
+
+                <Text
+                  fontWeight="600"
+                  color={formData.working_hours ? TEXT_DARK : "gray.400"}
+                  fontSize="sm"
+                  whiteSpace="pre-wrap"
+                >
+                  {formData.working_hours || "Working hours not added yet"}
+                </Text>
               </Box>
             </HStack>
-            <HStack gap={1}>
-              <IconButton size="sm" variant="ghost" aria-label="Edit" onClick={() => setEditSection('hours')}>
-                {!formData.working_hours ? <FiPlus /> : <FiEdit3 />}
-              </IconButton>
-              <IconButton size="sm" variant="ghost" colorPalette="red" aria-label="Delete" onClick={() => setDeleteSection('hours')}><FiTrash2 /></IconButton>
-            </HStack>
-          </Flex>
-          <Box><Text fontWeight="medium">{formData.working_hours || "—"}</Text></Box>
+          </Box>
         </Box>
 
-        {/* 4. Social Media Card */}
-        <Box bg="white" p={6} borderRadius="2xl" border="1px solid" borderColor="gray.200" boxShadow="sm">
-          <Flex justify="space-between" align="flex-start" mb={4}>
-            <HStack gap={3}>
-              <Flex w={10} h={10} borderRadius="lg" bg="pink.50" color="pink.600" align="center" justify="center"><FiTwitter size={20} /></Flex>
-              <Box>
-                <Heading size="sm" color="gray.800">Social Media</Heading>
-                <Text fontSize="xs" color="gray.500">Social links</Text>
-              </Box>
-            </HStack>
-            <HStack gap={1}>
-              <IconButton size="sm" variant="ghost" aria-label="Edit" onClick={() => setEditSection('social')}>
-                {(!formData.facebook_url && !formData.instagram_url && !formData.linkedin_url && !formData.youtube_url && !formData.twitter_url) ? <FiPlus /> : <FiEdit3 />}
-              </IconButton>
-              <IconButton size="sm" variant="ghost" colorPalette="red" aria-label="Delete" onClick={() => setDeleteSection('social')}><FiTrash2 /></IconButton>
-            </HStack>
+        {/* Social Media */}
+        <Box
+          bg="white"
+          p={{ base: 5, md: 6 }}
+          borderRadius="18px"
+          border="1px solid"
+          borderColor="gray.200"
+          boxShadow="0 3px 14px rgba(0,0,0,0.035)"
+          transition="all .2s"
+          _hover={{ boxShadow: "0 6px 22px rgba(0,0,0,0.06)" }}
+        >
+          <Flex justify="space-between" align="start" mb={5}>
+            <SectionHeader
+              icon={FiGlobe}
+              title="Social Media"
+              subtitle="Connect your social accounts"
+              color="#DB2777"
+              bg="#FCE7F3"
+            />
+
+            {renderCardActions("social", !!hasSocialLinks)}
           </Flex>
-          <HStack gap={4} mt={2} wrap="wrap">
-            {formData.facebook_url && <Icon as={FiFacebook} boxSize={6} color="#1877F2" />}
-            {formData.instagram_url && <Icon as={FiInstagram} boxSize={6} color="#E1306C" />}
-            {formData.linkedin_url && <Icon as={FiLinkedin} boxSize={6} color="#0A66C2" />}
-            {formData.youtube_url && <Icon as={FiYoutube} boxSize={6} color="#FF0000" />}
-            {formData.twitter_url && <Icon as={FiTwitter} boxSize={6} color="#1DA1F2" />}
-            {!formData.facebook_url && !formData.instagram_url && !formData.linkedin_url && !formData.youtube_url && !formData.twitter_url && (
-              <Text color="gray.400" fontSize="sm">No links added yet.</Text>
-            )}
-          </HStack>
+
+          <Separator borderColor="gray.100" mb={5} />
+
+          {hasSocialLinks ? (
+            <VStack align="stretch" gap={3}>
+              {socialItems.map((item) =>
+                formData[item.key] ? (
+                  <HStack key={item.key} gap={3}>
+                    <Flex
+                      w="36px"
+                      h="36px"
+                      borderRadius="10px"
+                      bg="gray.50"
+                      align="center"
+                      justify="center"
+                    >
+                      <Icon
+                        as={item.icon}
+                        color={item.color}
+                        boxSize={5}
+                      />
+                    </Flex>
+
+                    <Box minW={0} flex="1">
+                      <Text fontSize="sm" fontWeight="600" color={TEXT_DARK}>
+                        {item.label}
+                      </Text>
+
+                      <Text
+                        fontSize="xs"
+                        color="gray.500"
+                        overflow="hidden"
+                        textOverflow="ellipsis"
+                        whiteSpace="nowrap"
+                      >
+                        {formData[item.key]}
+                      </Text>
+                    </Box>
+
+                    <Badge
+                      bg="#ECFDF5"
+                      color="#15803D"
+                      borderRadius="full"
+                    >
+                      Added
+                    </Badge>
+                  </HStack>
+                ) : null
+              )}
+            </VStack>
+          ) : (
+            <Box
+              bg="gray.50"
+              border="1px dashed"
+              borderColor="gray.300"
+              borderRadius="12px"
+              py={6}
+              textAlign="center"
+            >
+              <Icon as={FiGlobe} color="gray.400" boxSize={6} mb={2} />
+              <Text color="gray.500" fontSize="sm">
+                No social links added yet
+              </Text>
+            </Box>
+          )}
         </Box>
       </SimpleGrid>
 
-      {/* ================= EDIT MODAL ================= */}
-      <Dialog.Root open={!!editSection} onOpenChange={(e) => { if(!e.open) setEditSection(null); }} size="md" placement="center">
+      {/* Edit Section Dialog */}
+      <Dialog.Root
+        open={!!editSection}
+        onOpenChange={(e) => {
+          if (!e.open && !saving) setEditSection(null);
+        }}
+        size="md"
+        placement="center"
+        scrollBehavior="inside"
+      >
         <Portal>
-          <Dialog.Backdrop bg="blackAlpha.600" backdropFilter="blur(2px)" />
-          <Dialog.Positioner>
-            <Dialog.Content borderRadius="2xl" boxShadow="xl" bg="white" overflow="hidden">
-              
-              <Dialog.Header px={6} py={4} bg="gray.50" borderBottomWidth="1px" borderColor="gray.100">
-                <Dialog.Title fontWeight="bold" color="#20243A">
-                  {editSection === 'institute' && (!formData.institute_name ? "Add Institute Info" : "Edit Institute Info")}
-                  {editSection === 'address' && (!formData.address ? "Add Location" : "Edit Location")}
-                  {editSection === 'hours' && (!formData.working_hours ? "Add Working Hours" : "Edit Working Hours")}
-                  {editSection === 'social' && (!formData.facebook_url && !formData.instagram_url && !formData.linkedin_url ? "Add Social Media" : "Edit Social Media")}
-                </Dialog.Title>
-              </Dialog.Header>
-              
-              <Dialog.CloseTrigger asChild>
-                <CloseButton size="sm" mt={3} mr={3} />
-              </Dialog.CloseTrigger>
+          <Dialog.Backdrop bg="blackAlpha.600" backdropFilter="blur(3px)" />
 
-              <Dialog.Body px={6} py={6} maxH="70vh" overflowY="auto">
-                {editSection === 'institute' && (
-                  <>
-                    <FormField label="Institute Name" name="institute_name" value={formData.institute_name} onChange={handleChange} />
-                    <FormField label="Email Address" name="email" type="email" value={formData.email} onChange={handleChange} />
-                    <Box mb={4}>
-                       <Text fontWeight="semibold" fontSize="sm" mb={2} color="gray.700">Phone Number</Text>
-                       <Input name="phone" value={formData.phone} onChange={handlePhoneChange} maxLength={10} placeholder="10-digit number" bg="gray.50" borderRadius="lg" _focus={{ bg: "white", borderColor: "purple.500" }} />
-                    </Box>
-                  </>
-                )}
+          <Dialog.Positioner px={4}>
+            <Dialog.Content
+              borderRadius="20px"
+              overflow="hidden"
+              bg="white"
+              boxShadow="0 20px 60px rgba(0,0,0,0.18)"
+              maxW="540px"
+              w="100%"
+            >
+              <Dialog.Header
+                px={6}
+                py={5}
+                bg="#F8F8FD"
+                borderBottom="1px solid"
+                borderColor="gray.100"
+              >
+                <HStack gap={3}>
+                  <Flex
+                    w="42px"
+                    h="42px"
+                    borderRadius="12px"
+                    bg={LIGHT_PURPLE}
+                    color={PRIMARY}
+                    align="center"
+                    justify="center"
+                  >
+                    <Icon as={FiEdit3} boxSize={5} />
+                  </Flex>
 
-                {editSection === 'address' && (
-                  <>
-                    <FormField label="Full Address" name="address" value={formData.address} onChange={handleChange} isTextArea />
-                    <FormField label="Google Map Embed URL" name="google_map_url" value={formData.google_map_url} onChange={handleChange} />
-                    <Text fontSize="xs" color="gray.500" mt={-2}>Paste the src URL from Google Maps Embed code.</Text>
-                  </>
-                )}
+                  <Box>
+                    <Dialog.Title color={TEXT_DARK} fontSize="lg" fontWeight="700">
+                      {editSection === "institute" &&
+                        (formData.institute_name
+                          ? "Edit Institute Info"
+                          : "Add Institute Info")}
 
-                {editSection === 'hours' && (
-                  <FormField label="Working Hours" name="working_hours" value={formData.working_hours} onChange={handleChange} />
-                )}
+                      {editSection === "address" &&
+                        (formData.address ? "Edit Location" : "Add Location")}
 
-                {editSection === 'social' && (
-                  <>
-                    <FormField label="Facebook URL" name="facebook_url" value={formData.facebook_url} onChange={handleChange} />
-                    <FormField label="Instagram URL" name="instagram_url" value={formData.instagram_url} onChange={handleChange} />
-                    <FormField label="LinkedIn URL" name="linkedin_url" value={formData.linkedin_url} onChange={handleChange} />
-                    <FormField label="YouTube URL" name="youtube_url" value={formData.youtube_url} onChange={handleChange} />
-                    <FormField label="Twitter / X URL" name="twitter_url" value={formData.twitter_url} onChange={handleChange} />
-                  </>
-                )}
-              </Dialog.Body>
+                      {editSection === "hours" &&
+                        (formData.working_hours
+                          ? "Edit Working Hours"
+                          : "Add Working Hours")}
 
-              <Dialog.Footer px={6} py={4} bg="gray.50" borderTopWidth="1px" borderColor="gray.100">
-                <HStack gap={3} w="full" justify="flex-end">
-                  <Button variant="ghost" onClick={() => setEditSection(null)} borderRadius="lg">Cancel</Button>
-                  <Button colorPalette="purple" onClick={handleSave} loading={saving} borderRadius="lg" px={6}>
-                    <FiSave /> Save Section
-                  </Button>
+                      {editSection === "social" &&
+                        (hasSocialLinks
+                          ? "Edit Social Media"
+                          : "Add Social Media")}
+                    </Dialog.Title>
+
+                    <Text fontSize="xs" color="gray.500" mt={1}>
+                      Update your website information below.
+                    </Text>
+                  </Box>
                 </HStack>
-              </Dialog.Footer>
-
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Portal>
-      </Dialog.Root>
-
-      {/* ================= DELETE MODAL ================= */}
-      <Dialog.Root open={!!deleteSection} onOpenChange={(e) => { if(!e.open) setDeleteSection(null); }} size="md" placement="center">
-        <Portal>
-          <Dialog.Backdrop bg="blackAlpha.600" backdropFilter="blur(2px)" />
-          <Dialog.Positioner>
-            <Dialog.Content borderRadius="2xl" boxShadow="xl" bg="white" overflow="hidden">
-              <Dialog.Header px={6} py={4} bg="red.50" borderBottomWidth="1px" borderColor="red.100">
-                <Dialog.Title fontWeight="bold" color="red.700">Delete Section Data</Dialog.Title>
               </Dialog.Header>
-              
+
               <Dialog.CloseTrigger asChild>
-                <CloseButton size="sm" mt={3} mr={3} />
+                <CloseButton
+                  position="absolute"
+                  top="17px"
+                  right="17px"
+                  borderRadius="full"
+                  color="gray.500"
+                  disabled={saving}
+                  _hover={{ bg: "gray.100" }}
+                />
               </Dialog.CloseTrigger>
 
               <Dialog.Body px={6} py={6}>
-                <Text fontSize="md" mb={3}>
-                  Are you sure you want to delete the data for <strong>{deleteSection === 'institute' ? 'Institute Info' : deleteSection === 'address' ? 'Location' : deleteSection === 'hours' ? 'Working Hours' : 'Social Media'}</strong>?
-                </Text>
-                <Text fontSize="sm" color="gray.500">
-                  This will clear these specific fields and remove them from the live website immediately. This action cannot be undone.
-                </Text>
+                <VStack align="stretch" gap={4}>
+                  {editSection === "institute" && (
+                    <>
+                      <FormField
+                        label="Institute Name"
+                        name="institute_name"
+                        value={formData.institute_name}
+                        onChange={handleChange}
+                        placeholder="Enter institute name"
+                      />
+
+                      <FormField
+                        label="Email Address"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="Enter email address"
+                      />
+
+                      <Box>
+                        <Text fontWeight="600" fontSize="sm" mb={2} color="#34384D">
+                          Phone Number
+                        </Text>
+
+                        <Input
+                          name="phone"
+                          type="tel"
+                          value={formData.phone}
+                          onChange={handlePhoneChange}
+                          maxLength={10}
+                          placeholder="10-digit mobile number"
+                          bg="gray.50"
+                          border="1px solid"
+                          borderColor="gray.200"
+                          borderRadius="10px"
+                          h="44px"
+                          _focus={{
+                            bg: "white",
+                            borderColor: PRIMARY,
+                            boxShadow: `0 0 0 1px ${PRIMARY}`,
+                          }}
+                        />
+                      </Box>
+                    </>
+                  )}
+
+                  {editSection === "address" && (
+                    <>
+                      <FormField
+                        label="Full Address"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleChange}
+                        isTextArea
+                        placeholder="Enter your complete institute address"
+                      />
+
+                      <FormField
+                        label="Google Map Embed URL"
+                        name="google_map_url"
+                        value={formData.google_map_url}
+                        onChange={handleChange}
+                        placeholder="Paste Google Maps embed URL"
+                      />
+
+                      <Box
+                        bg="#EEEEFB"
+                        borderRadius="10px"
+                        p={3}
+                      >
+                        <HStack align="start" gap={2}>
+                          <Icon as={FiMapPin} color={PRIMARY} mt="2px" />
+                          <Text fontSize="xs" color="#4545A5" lineHeight="1.6">
+                            Paste only the src URL from the Google Maps Embed
+                            code. The map preview will appear in the Location
+                            card after saving.
+                          </Text>
+                        </HStack>
+                      </Box>
+                    </>
+                  )}
+
+                  {editSection === "hours" && (
+                    <FormField
+                      label="Working Hours"
+                      name="working_hours"
+                      value={formData.working_hours}
+                      onChange={handleChange}
+                      isTextArea
+                      placeholder="Example: Monday - Saturday, 9:00 AM - 6:00 PM"
+                    />
+                  )}
+
+                  {editSection === "social" && (
+                    <>
+                      <FormField
+                        label="Facebook URL"
+                        name="facebook_url"
+                        value={formData.facebook_url}
+                        onChange={handleChange}
+                        placeholder="https://facebook.com/..."
+                      />
+
+                      <FormField
+                        label="Instagram URL"
+                        name="instagram_url"
+                        value={formData.instagram_url}
+                        onChange={handleChange}
+                        placeholder="https://instagram.com/..."
+                      />
+
+                      <FormField
+                        label="LinkedIn URL"
+                        name="linkedin_url"
+                        value={formData.linkedin_url}
+                        onChange={handleChange}
+                        placeholder="https://linkedin.com/..."
+                      />
+
+                      <FormField
+                        label="YouTube URL"
+                        name="youtube_url"
+                        value={formData.youtube_url}
+                        onChange={handleChange}
+                        placeholder="https://youtube.com/..."
+                      />
+
+                      <FormField
+                        label="Twitter / X URL"
+                        name="twitter_url"
+                        value={formData.twitter_url}
+                        onChange={handleChange}
+                        placeholder="https://x.com/..."
+                      />
+                    </>
+                  )}
+                </VStack>
               </Dialog.Body>
 
-              <Dialog.Footer px={6} py={4} bg="gray.50" borderTopWidth="1px" borderColor="gray.100">
-                <HStack gap={3} w="full" justify="flex-end">
-                  <Button variant="ghost" onClick={() => setDeleteSection(null)} borderRadius="lg">Cancel</Button>
-                  <Button colorPalette="red" onClick={handleDelete} loading={saving} borderRadius="lg" px={6}>
-                    <FiTrash2 /> Yes, Delete
+              <Dialog.Footer
+                px={6}
+                py={4}
+                bg="#F8F8FD"
+                borderTop="1px solid"
+                borderColor="gray.100"
+              >
+                <Flex
+                  w="100%"
+                  justify="flex-end"
+                  gap={3}
+                  direction={{ base: "column-reverse", sm: "row" }}
+                >
+                  <Button
+                    variant="outline"
+                    borderColor="gray.300"
+                    color="gray.700"
+                    borderRadius="10px"
+                    h="44px"
+                    px={5}
+                    onClick={() => setEditSection(null)}
+                    disabled={saving}
+                  >
+                    Cancel
                   </Button>
-                </HStack>
+
+                  <Button
+                    bg={PRIMARY}
+                    color="white"
+                    borderRadius="10px"
+                    h="44px"
+                    px={6}
+                    loading={saving}
+                    onClick={handleSave}
+                    _hover={{ bg: PRIMARY_DARK }}
+                  >
+                    <FiSave />
+                    Save Changes
+                  </Button>
+                </Flex>
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
         </Portal>
       </Dialog.Root>
 
-    </Box>
+      {/* Delete Confirmation Dialog */}
+      <Dialog.Root
+        open={!!deleteSection}
+        onOpenChange={(e) => {
+          if (!e.open && !saving) setDeleteSection(null);
+        }}
+        role="alertdialog"
+        size="md"
+        placement="center"
+      >
+        <Portal>
+          <Dialog.Backdrop bg="blackAlpha.600" backdropFilter="blur(3px)" />
+
+          <Dialog.Positioner px={4}>
+            <Dialog.Content
+              maxW="440px"
+              w="100%"
+              borderRadius="20px"
+              overflow="hidden"
+              bg="white"
+              boxShadow="0 20px 60px rgba(0,0,0,0.18)"
+            >
+              <Dialog.CloseTrigger asChild>
+                <CloseButton
+                  position="absolute"
+                  top="16px"
+                  right="16px"
+                  color="gray.500"
+                  borderRadius="full"
+                  disabled={saving}
+                  _hover={{ bg: "gray.100" }}
+                />
+              </Dialog.CloseTrigger>
+
+              <Dialog.Header
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                textAlign="center"
+                pt={9}
+                px={6}
+                pb={2}
+              >
+                <Flex
+                  w="66px"
+                  h="66px"
+                  borderRadius="full"
+                  bg="#FDECF3"
+                  color={DANGER}
+                  align="center"
+                  justify="center"
+                  mb={4}
+                >
+                  <Icon as={FiAlertTriangle} boxSize={7} />
+                </Flex>
+
+                <Dialog.Title
+                  color={TEXT_DARK}
+                  fontSize="xl"
+                  fontWeight="700"
+                >
+                  Delete {sectionNames[deleteSection]}?
+                </Dialog.Title>
+              </Dialog.Header>
+
+              <Dialog.Body px={7} pt={3} pb={6} textAlign="center">
+                <Text
+                  color="gray.600"
+                  fontSize="sm"
+                  lineHeight="1.8"
+                  mb={5}
+                >
+                  Are you sure you want to permanently clear this section's
+                  information? The changes will also be reflected on your live
+                  website.
+                </Text>
+
+                <Box
+                  bg="gray.50"
+                  border="1px solid"
+                  borderColor="gray.200"
+                  borderRadius="12px"
+                  p={4}
+                >
+                  <Text
+                    color="gray.500"
+                    fontSize="xs"
+                    fontWeight="700"
+                    letterSpacing="0.5px"
+                  >
+                    SELECTED SECTION
+                  </Text>
+
+                  <Text
+                    color={TEXT_DARK}
+                    fontWeight="700"
+                    fontSize="md"
+                    mt={1}
+                  >
+                    {sectionNames[deleteSection]}
+                  </Text>
+                </Box>
+              </Dialog.Body>
+
+              <Dialog.Footer
+                px={7}
+                pt={0}
+                pb={7}
+                justifyContent="center"
+                gap={3}
+                flexDirection={{ base: "column-reverse", sm: "row" }}
+              >
+                <Button
+                  w={{ base: "100%", sm: "auto" }}
+                  minW="130px"
+                  h="45px"
+                  variant="outline"
+                  borderColor="gray.300"
+                  borderRadius="10px"
+                  onClick={() => setDeleteSection(null)}
+                  disabled={saving}
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  w={{ base: "100%", sm: "auto" }}
+                  minW="150px"
+                  h="45px"
+                  bg={DANGER}
+                  color="white"
+                  borderRadius="10px"
+                  loading={saving}
+                  onClick={handleDelete}
+                  _hover={{ bg: "#BE185D" }}
+                >
+                  <FiTrash2 />
+                  Yes, Delete
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
+    </VStack>
   );
 }

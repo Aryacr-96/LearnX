@@ -282,9 +282,23 @@ function Course() {
                     transition="all 0.25s ease"
                     display="flex"
                     flexDirection="column"
+                    cursor="pointer"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handleViewDetails(course)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleViewDetails(course);
+                      }
+                    }}
                     _hover={{
                       transform: "translateY(-5px)",
                       boxShadow: "0 15px 35px rgba(30, 50, 80, 0.10)",
+                    }}
+                    _focusVisible={{
+                      outline: "2px solid #111827",
+                      outlineOffset: "2px",
                     }}
                   >
                     {/* COURSE IMAGE */}
@@ -418,7 +432,10 @@ function Course() {
                           fontWeight="600"
                           cursor="pointer"
                           flexShrink="0"
-                          onClick={() => handleViewDetails(course)}
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent double triggering
+                            handleViewDetails(course);
+                          }}
                           _hover={{
                             background: "#263247",
                             transform: "translateY(-2px)",

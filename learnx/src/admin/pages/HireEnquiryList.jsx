@@ -14,12 +14,17 @@ import {
   Separator,
   Skeleton,
   Icon,
+  Badge,
 } from "@chakra-ui/react";
 import {
   FiTrash2,
   FiRefreshCw,
   FiMail,
   FiBriefcase,
+  FiPhone,
+  FiUser,
+  FiInbox,
+  FiCheckCircle,
 } from "react-icons/fi";
 
 import { getAll, remove, patch } from "../services/crud";
@@ -28,6 +33,7 @@ export default function HireEnquiryList() {
   const [enquiries, setEnquiries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -50,7 +56,9 @@ export default function HireEnquiryList() {
   }, []);
 
   async function handleDelete() {
-    if (!deleteTarget) return;
+    if (!deleteTarget || deleting) return;
+
+    setDeleting(true);
 
     try {
       await remove("hire-enquiries", deleteTarget.id);
@@ -60,6 +68,8 @@ export default function HireEnquiryList() {
     } catch (err) {
       setError(err.message || "Unable to delete the enquiry.");
       setDeleteTarget(null);
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -80,200 +90,505 @@ export default function HireEnquiryList() {
   }
 
   return (
-    <VStack align="stretch" gap="24px">
-      <Flex justify="space-between" align="center" wrap="wrap" gap="12px">
-        <Box>
-          <Heading size="lg" color="#20243A">
-            Hire Enquiries
-          </Heading>
+    <Box
+      minH="100vh"
+      bg="#F6F7FB"
+      p={{ base: 3, md: 6, lg: 8 }}
+    >
+      <VStack align="stretch" gap={6} maxW="1600px" mx="auto">
 
-          <Text color="gray.500" mt="8px">
-            Manage companies looking to hire your students.
-          </Text>
-        </Box>
-
-        <Button
-          variant="outline"
-          borderRadius="10px"
-          onClick={loadEnquiries}
-          loading={loading}
+        {/* PAGE HEADER */}
+        <Flex
+          justify="space-between"
+          align={{ base: "flex-start", md: "center" }}
+          direction={{ base: "column", md: "row" }}
+          gap={4}
         >
-          <FiRefreshCw /> Refresh
-        </Button>
-      </Flex>
+          <Box>
+            <HStack gap={2} mb={2}>
+              <Box
+                bg="#EEEEFB"
+                color="#4545A5"
+                p={2}
+                borderRadius="10px"
+              >
+                <Icon as={FiBriefcase} boxSize={5} />
+              </Box>
 
-      {success && (
-        <Box
-          bg="green.50"
-          border="1px solid"
-          borderColor="green.200"
-          color="green.700"
-          p="12px 16px"
-          borderRadius="10px"
-          fontSize="sm"
-        >
-          {success}
-        </Box>
-      )}
+              <Badge
+                bg="#EEEEFB"
+                color="#4545A5"
+                px={3}
+                py={1}
+                borderRadius="full"
+                fontSize="xs"
+              >
+                ENQUIRY MANAGEMENT
+              </Badge>
+            </HStack>
 
-      {error && (
-        <Box
-          bg="red.50"
-          border="1px solid"
-          borderColor="red.200"
-          color="red.700"
-          p="12px 16px"
-          borderRadius="10px"
-          fontSize="sm"
-        >
-          {error}
-        </Box>
-      )}
-
-      <Box
-        bg="white"
-        p={{ base: "18px", md: "26px" }}
-        borderRadius="20px"
-        border="1px solid"
-        borderColor="gray.200"
-        boxShadow="sm"
-      >
-        <Flex justify="space-between" align="center" mb="24px">
-          <HStack gap="12px">
-            <Heading size="md" color="#20243A">
-              All Enquiries
+            <Heading
+              size={{ base: "lg", md: "xl" }}
+              color="#20243A"
+              fontWeight="800"
+            >
+              Hire Enquiries
             </Heading>
 
-            <Box
-              bg="#EEEEFB"
-              color="#4545A5"
-              px="10px"
-              py="4px"
-              borderRadius="full"
-              fontSize="sm"
-              fontWeight="bold"
-            >
-              {enquiries.length} total
-            </Box>
-          </HStack>
+            <Text color="#85869A" fontSize="sm" mt={2}>
+              Manage companies looking to hire your students.
+            </Text>
+          </Box>
+
+          <Button
+            bg="#4545A5"
+            color="white"
+            px={5}
+            h="44px"
+            borderRadius="10px"
+            fontWeight="600"
+            onClick={loadEnquiries}
+            loading={loading}
+            _hover={{
+              bg: "#353584",
+              transform: "translateY(-1px)",
+            }}
+            transition="all 0.2s"
+          >
+            <Icon as={FiRefreshCw} mr={2} />
+            Refresh
+          </Button>
         </Flex>
 
-        {loading ? (
-          <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} gap="24px">
-            {[1, 2, 3].map((i) => (
-              <Box
-                key={i}
-                p="20px"
-                border="1px solid"
-                borderColor="gray.100"
-                borderRadius="16px"
-              >
-                <Skeleton height="20px" mb="12px" width="60%" />
-                <Skeleton height="16px" mb="8px" width="80%" />
-                <Skeleton height="16px" width="40%" />
-              </Box>
-            ))}
-          </SimpleGrid>
-        ) : enquiries.length === 0 ? (
-          <VStack
-            py="60px"
-            gap="16px"
-            bg="gray.50"
-            borderRadius="16px"
-            border="1px dashed"
-            borderColor="gray.300"
+        {/* SUCCESS MESSAGE */}
+        {success && (
+          <Flex
+            align="center"
+            gap={3}
+            bg="#ECFDF5"
+            border="1px solid #A7F3D0"
+            color="#047857"
+            p={4}
+            borderRadius="12px"
           >
+            <Icon as={FiCheckCircle} boxSize={5} />
+            <Text fontSize="sm" fontWeight="600">
+              {success}
+            </Text>
+
+            <Box flex="1" />
+
+            <Button
+              size="xs"
+              variant="ghost"
+              color="#047857"
+              onClick={() => setSuccess("")}
+            >
+              Dismiss
+            </Button>
+          </Flex>
+        )}
+
+        {/* ERROR MESSAGE */}
+        {error && (
+          <Flex
+            align="center"
+            gap={3}
+            bg="#FFF1F2"
+            border="1px solid #FECDD3"
+            color="#BE123C"
+            p={4}
+            borderRadius="12px"
+          >
+            <Icon as={FiInbox} boxSize={5} />
+            <Text fontSize="sm" fontWeight="600">
+              {error}
+            </Text>
+
+            <Box flex="1" />
+
+            <Button
+              size="xs"
+              variant="ghost"
+              color="#BE123C"
+              onClick={() => setError("")}
+            >
+              Dismiss
+            </Button>
+          </Flex>
+        )}
+
+        {/* TOTAL ENQUIRIES */}
+        <Box
+          bg="white"
+          p={5}
+          borderRadius="16px"
+          border="1px solid #EBECF3"
+          boxShadow="0 3px 14px rgba(30,35,80,0.03)"
+          maxW={{ base: "100%", sm: "280px" }}
+        >
+          <HStack justify="space-between">
+            <Box>
+              <Text color="#9293A5" fontSize="sm" fontWeight="600">
+                Total Enquiries
+              </Text>
+
+              <Heading size="2xl" color="#20243A" mt={2}>
+                {enquiries.length}
+              </Heading>
+            </Box>
+
             <Flex
-              w="64px"
-              h="64px"
-              borderRadius="full"
+              w="48px"
+              h="48px"
               bg="#EEEEFB"
               color="#4545A5"
+              borderRadius="13px"
               align="center"
               justify="center"
             >
-              <Icon as={FiBriefcase} boxSize="32px" />
+              <Icon as={FiBriefcase} boxSize={6} />
             </Flex>
+          </HStack>
+        </Box>
 
-            <Box textAlign="center">
-              <Text fontWeight="bold" color="#20243A" fontSize="lg">
-                No enquiries yet
-              </Text>
+        {/* ENQUIRIES SECTION */}
+        <Box
+          bg="white"
+          p={{ base: 4, md: 6 }}
+          borderRadius="20px"
+          border="1px solid #EBECF3"
+          boxShadow="0 4px 18px rgba(30,35,80,0.04)"
+        >
+          <Flex
+            justify="space-between"
+            align={{ base: "flex-start", sm: "center" }}
+            direction={{ base: "column", sm: "row" }}
+            gap={3}
+            mb={6}
+          >
+            <Box>
+              <Heading size="md" color="#20243A">
+                All Enquiries
+              </Heading>
 
-              <Text color="gray.500" fontSize="sm" mt="4px">
-                When companies register, they will appear here.
+              <Text fontSize="sm" color="#9293A5" mt={1}>
+                Company registration and hiring requests
               </Text>
             </Box>
-          </VStack>
-        ) : (
-          <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} gap="24px">
-            {enquiries.map((enquiry) => (
-              <Box
-                key={enquiry.id}
-                border="1px solid"
-                borderColor={enquiry.is_read ? "gray.200" : "#4545A5"}
-                borderRadius="16px"
-                bg="white"
-                p="20px"
-                boxShadow="sm"
-                position="relative"
-                onClick={() => markAsRead(enquiry)}
-                cursor={enquiry.is_read ? "default" : "pointer"}
+
+            <Badge
+              bg="#EEEEFB"
+              color="#4545A5"
+              px={3}
+              py={2}
+              borderRadius="lg"
+              fontSize="sm"
+            >
+              {enquiries.length} Total
+            </Badge>
+          </Flex>
+
+          <Separator borderColor="#EEEEF4" mb={6} />
+
+          {/* LOADING */}
+          {loading ? (
+            <SimpleGrid
+              columns={{ base: 1, md: 2, xl: 3 }}
+              gap={5}
+            >
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <Box
+                  key={i}
+                  p={5}
+                  border="1px solid #EEEEF4"
+                  borderRadius="16px"
+                >
+                  <Skeleton height="22px" mb={4} width="65%" />
+                  <Skeleton height="14px" mb={3} width="85%" />
+                  <Skeleton height="14px" mb={3} width="70%" />
+                  <Skeleton height="14px" mb={5} width="50%" />
+                  <Skeleton height="38px" borderRadius="9px" />
+                </Box>
+              ))}
+            </SimpleGrid>
+          ) : enquiries.length === 0 ? (
+            /* EMPTY STATE */
+            <VStack
+              py={16}
+              gap={4}
+              bg="#FAFAFD"
+              borderRadius="16px"
+              border="1px dashed #D9DAE8"
+            >
+              <Flex
+                w="70px"
+                h="70px"
+                borderRadius="20px"
+                bg="#EEEEFB"
+                color="#4545A5"
+                align="center"
+                justify="center"
               >
-                <Heading size="sm" color="#20243A" mb="4px">
-                  {enquiry.company_name}
+                <Icon as={FiInbox} boxSize={8} />
+              </Flex>
+
+              <Box textAlign="center">
+                <Heading size="md" color="#20243A">
+                  No enquiries yet
                 </Heading>
 
-                <Text fontSize="sm" color="gray.600" mb="12px">
-                  {enquiry.contact_person}
+                <Text color="#9293A5" fontSize="sm" mt={2}>
+                  When companies submit hiring enquiries, they will appear here.
                 </Text>
+              </Box>
 
-                <HStack fontSize="xs" color="gray.500" mb="12px" gap="12px">
-                  <HStack>
-                    <Icon as={FiMail} />
-                    <Text>{enquiry.email}</Text>
-                  </HStack>
-                </HStack>
-
-                <Text fontSize="xs" color="gray.500" mb="4px">
-                  Phone: {enquiry.phone}
-                </Text>
-
-                <Separator my="12px" borderColor="gray.100" />
-
-                <Text
-                  fontSize="sm"
-                  color="gray.700"
-                  fontWeight="500"
-                  mb="16px"
-                >
-                  Roles:{" "}
-                  <Text as="span" fontWeight="normal">
-                    {Array.isArray(enquiry.job_roles)
-                      ? enquiry.job_roles.join(", ")
-                      : enquiry.job_roles}
-                  </Text>
-                </Text>
-
-                <Button
-                  size="sm"
-                  variant="outline"
-                  color="#DB2777"
-                  borderColor="red.200"
-                  _hover={{ bg: "#FDECF3", borderColor: "#DB2777" }}
-                  width="100%"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteTarget(enquiry);
+              <Button
+                variant="outline"
+                color="#4545A5"
+                borderColor="#4545A5"
+                borderRadius="10px"
+                onClick={loadEnquiries}
+              >
+                <Icon as={FiRefreshCw} mr={2} />
+                Refresh Enquiries
+              </Button>
+            </VStack>
+          ) : (
+            /* ENQUIRY CARDS */
+            <SimpleGrid
+              columns={{ base: 1, md: 2, xl: 3 }}
+              gap={5}
+            >
+              {enquiries.map((enquiry) => (
+                <Box
+                  key={enquiry.id}
+                  border="1px solid"
+                  borderColor={enquiry.is_read ? "#E9EAF1" : "#B5B5E1"}
+                  borderRadius="16px"
+                  bg="white"
+                  p={{ base: 4, md: 5 }}
+                  boxShadow={
+                    enquiry.is_read
+                      ? "0 2px 10px rgba(30,35,80,0.03)"
+                      : "0 3px 14px rgba(69,69,165,0.07)"
+                  }
+                  position="relative"
+                  cursor={enquiry.is_read ? "default" : "pointer"}
+                  onClick={() => markAsRead(enquiry)}
+                  transition="all 0.2s"
+                  _hover={{
+                    borderColor: "#9999D0",
+                    boxShadow: "0 6px 18px rgba(30,35,80,0.07)",
+                    transform: "translateY(-2px)",
                   }}
                 >
-                  <FiTrash2 /> Delete
-                </Button>
-              </Box>
-            ))}
-          </SimpleGrid>
-        )}
-      </Box>
+                  {/* CARD HEADER */}
+                  <Flex
+                    justify="space-between"
+                    align="flex-start"
+                    gap={2}
+                  >
+                    <HStack align="flex-start" gap={3}>
+                      <Flex
+                        w="42px"
+                        h="42px"
+                        flexShrink={0}
+                        borderRadius="12px"
+                        bg="#EEEEFB"
+                        color="#4545A5"
+                        align="center"
+                        justify="center"
+                      >
+                        <Icon as={FiBriefcase} boxSize={5} />
+                      </Flex>
+
+                      <Box minW="0">
+                        <Heading
+                          size="sm"
+                          color="#20243A"
+                          wordBreak="break-word"
+                          lineHeight="1.5"
+                        >
+                          {enquiry.company_name || "Unnamed Company"}
+                        </Heading>
+
+                        <Text fontSize="xs" color="#9293A5" mt={1}>
+                          Company enquiry
+                        </Text>
+                      </Box>
+                    </HStack>
+
+                    <Badge
+                      flexShrink={0}
+                      bg={enquiry.is_read ? "#E8F8F1" : "#FDECF3"}
+                      color={enquiry.is_read ? "#059669" : "#DB2777"}
+                      px={2}
+                      py={1}
+                      borderRadius="full"
+                      fontSize="10px"
+                    >
+                      {enquiry.is_read ? "READ" : "NEW"}
+                    </Badge>
+                  </Flex>
+
+                  <Separator my={4} borderColor="#EEEEF4" />
+
+                  {/* CONTACT PERSON */}
+                  <HStack gap={3} align="flex-start" mb={3}>
+                    <Icon
+                      as={FiUser}
+                      color="#7778A0"
+                      mt="3px"
+                      flexShrink={0}
+                    />
+
+                    <Box minW="0">
+                      <Text
+                        fontSize="xs"
+                        color="#9293A5"
+                        fontWeight="600"
+                      >
+                        CONTACT PERSON
+                      </Text>
+
+                      <Text
+                        fontSize="sm"
+                        color="#343653"
+                        fontWeight="600"
+                        mt={1}
+                        wordBreak="break-word"
+                      >
+                        {enquiry.contact_person || "Not provided"}
+                      </Text>
+                    </Box>
+                  </HStack>
+
+                  {/* EMAIL */}
+                  <HStack gap={3} align="flex-start" mb={3}>
+                    <Icon
+                      as={FiMail}
+                      color="#7778A0"
+                      mt="3px"
+                      flexShrink={0}
+                    />
+
+                    <Box minW="0">
+                      <Text
+                        fontSize="xs"
+                        color="#9293A5"
+                        fontWeight="600"
+                      >
+                        EMAIL ADDRESS
+                      </Text>
+
+                      <Text
+                        fontSize="sm"
+                        color="#4545A5"
+                        fontWeight="500"
+                        mt={1}
+                        wordBreak="break-word"
+                      >
+                        {enquiry.email || "Not provided"}
+                      </Text>
+                    </Box>
+                  </HStack>
+
+                  {/* PHONE */}
+                  <HStack gap={3} align="flex-start" mb={3}>
+                    <Icon
+                      as={FiPhone}
+                      color="#7778A0"
+                      mt="3px"
+                      flexShrink={0}
+                    />
+
+                    <Box minW="0">
+                      <Text
+                        fontSize="xs"
+                        color="#9293A5"
+                        fontWeight="600"
+                      >
+                        PHONE NUMBER
+                      </Text>
+
+                      <Text
+                        fontSize="sm"
+                        color="#343653"
+                        fontWeight="500"
+                        mt={1}
+                        wordBreak="break-word"
+                      >
+                        {enquiry.phone || "Not provided"}
+                      </Text>
+                    </Box>
+                  </HStack>
+
+                  <Separator my={4} borderColor="#EEEEF4" />
+
+                  {/* JOB ROLES */}
+                  <Box mb={4}>
+                    <HStack gap={2} mb={2}>
+                      <Icon as={FiBriefcase} color="#7778A0" />
+
+                      <Text
+                        fontSize="xs"
+                        color="#9293A5"
+                        fontWeight="700"
+                      >
+                        HIRING ROLES
+                      </Text>
+                    </HStack>
+
+                    <Box
+                      bg="#FAFAFD"
+                      borderRadius="10px"
+                      p={3}
+                      border="1px solid #EEEEF4"
+                    >
+                      <Text
+                        fontSize="sm"
+                        color="#4545A5"
+                        fontWeight="600"
+                        lineHeight="1.7"
+                        wordBreak="break-word"
+                      >
+                        {Array.isArray(enquiry.job_roles)
+                          ? enquiry.job_roles.join(", ")
+                          : enquiry.job_roles || "No roles specified"}
+                      </Text>
+                    </Box>
+                  </Box>
+
+                  {/* DELETE BUTTON */}
+                  <Button
+                    size="md"
+                    variant="outline"
+                    color="#DB2777"
+                    borderColor="#F3B8CF"
+                    bg="white"
+                    borderRadius="10px"
+                    w="100%"
+                    h="40px"
+                    fontWeight="600"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteTarget(enquiry);
+                    }}
+                    _hover={{
+                      bg: "#FDECF3",
+                      borderColor: "#DB2777",
+                    }}
+                  >
+                    <Icon as={FiTrash2} mr={2} />
+                    Delete Enquiry
+                  </Button>
+                </Box>
+              ))}
+            </SimpleGrid>
+          )}
+        </Box>
+      </VStack>
 
       {/* DELETE CONFIRMATION DIALOG */}
       <Dialog.Root
@@ -285,111 +600,114 @@ export default function HireEnquiryList() {
         <Portal>
           <Dialog.Backdrop
             bg="blackAlpha.600"
-            backdropFilter="blur(3px)"
+            backdropFilter="blur(4px)"
           />
 
           <Dialog.Positioner>
             <Dialog.Content
-              maxW={{ base: "calc(100% - 32px)", sm: "460px" }}
+              maxW={{ base: "calc(100% - 28px)", sm: "460px" }}
               borderRadius="20px"
               overflow="hidden"
               boxShadow="2xl"
-              p="0"
+              p={0}
             >
-              {/* HEADER */}
               <Dialog.Header
-                px="28px"
-                pt="28px"
-                pb="20px"
+                px={{ base: 5, md: 7 }}
+                pt={7}
+                pb={5}
                 display="flex"
                 alignItems="center"
-                gap="16px"
+                gap={4}
               >
                 <Flex
                   w="52px"
                   h="52px"
-                  flexShrink="0"
-                  borderRadius="full"
+                  flexShrink={0}
+                  borderRadius="15px"
                   bg="#FDECF3"
                   color="#DB2777"
                   align="center"
                   justify="center"
                 >
-                  <Icon as={FiTrash2} boxSize="23px" />
+                  <Icon as={FiTrash2} boxSize={6} />
                 </Flex>
 
                 <Box>
                   <Dialog.Title
                     color="#20243A"
                     fontSize="lg"
-                    fontWeight="bold"
+                    fontWeight="800"
                   >
                     Delete this enquiry?
                   </Dialog.Title>
 
-                  <Text color="gray.500" fontSize="sm" mt="4px">
-                    Please confirm this action.
+                  <Text color="#9293A5" fontSize="sm" mt={1}>
+                    Confirm before permanently deleting.
                   </Text>
                 </Box>
               </Dialog.Header>
 
-              {/* BODY */}
-              <Dialog.Body px="28px" pb="24px">
+              <Dialog.Body
+                px={{ base: 5, md: 7 }}
+                pb={6}
+              >
                 <Box
                   bg="#FFF5F8"
-                  border="1px solid"
-                  borderColor="#FBCFE0"
+                  border="1px solid #FBCFE0"
                   borderRadius="12px"
-                  p="16px"
+                  p={4}
                 >
-                  <Text color="gray.600" fontSize="sm" lineHeight="1.8">
-                    You are about to permanently delete the enquiry from
+                  <Text
+                    color="#77778A"
+                    fontSize="sm"
+                    lineHeight="1.7"
+                  >
+                    You are about to permanently delete the enquiry from:
                   </Text>
 
                   <Text
                     color="#20243A"
-                    fontWeight="bold"
+                    fontWeight="700"
                     fontSize="md"
-                    mt="6px"
+                    mt={2}
                     wordBreak="break-word"
                   >
-                    “{deleteTarget?.company_name}”
+                    {deleteTarget?.company_name}
                   </Text>
 
                   <Text
                     color="#DB2777"
                     fontSize="sm"
-                    fontWeight="medium"
-                    mt="10px"
+                    fontWeight="600"
+                    mt={3}
                   >
                     This action cannot be undone.
                   </Text>
                 </Box>
               </Dialog.Body>
 
-              {/* FOOTER */}
               <Dialog.Footer
-                px="28px"
-                pt="18px"
-                pb="26px"
-                borderTop="1px solid"
-                borderColor="gray.100"
-                bg="gray.50"
+                px={{ base: 5, md: 7 }}
+                py={5}
+                borderTop="1px solid #EEEEF4"
+                bg="#FAFAFD"
               >
                 <Flex
                   w="100%"
-                  gap="12px"
+                  gap={3}
                   justify="flex-end"
                   direction={{ base: "column-reverse", sm: "row" }}
                 >
                   <Button
                     variant="outline"
                     borderRadius="10px"
-                    borderColor="gray.300"
-                    color="gray.700"
+                    borderColor="#D9DAE5"
+                    color="#55566B"
+                    h="44px"
                     w={{ base: "100%", sm: "auto" }}
                     onClick={() => setDeleteTarget(null)}
-                    _hover={{ bg: "gray.100" }}
+                    disabled={deleting}
+                    _hover={{ bg: "#F0F0F5" }}
                   >
                     Cancel
                   </Button>
@@ -398,11 +716,15 @@ export default function HireEnquiryList() {
                     color="white"
                     bg="#DB2777"
                     borderRadius="10px"
+                    h="44px"
+                    px={5}
                     w={{ base: "100%", sm: "auto" }}
+                    loading={deleting}
+                    loadingText="Deleting..."
                     onClick={handleDelete}
                     _hover={{ bg: "#BE185D" }}
                   >
-                    <FiTrash2 />
+                    <Icon as={FiTrash2} mr={2} />
                     Delete Enquiry
                   </Button>
                 </Flex>
@@ -411,6 +733,6 @@ export default function HireEnquiryList() {
           </Dialog.Positioner>
         </Portal>
       </Dialog.Root>
-    </VStack>
+    </Box>
   );
 }

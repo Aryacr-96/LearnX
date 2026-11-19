@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import {
   Box,
@@ -6,7 +7,6 @@ import {
   Heading,
   Input,
   Text,
-  Textarea,
   VStack,
   HStack,
   Image,
@@ -20,10 +20,22 @@ import {
   Field,
   Icon,
   Skeleton,
+  Textarea,
 } from "@chakra-ui/react";
-import { FiEdit2, FiTrash2, FiPlus, FiRefreshCw, FiUploadCloud, FiUser } from "react-icons/fi";
+import {
+  FiEdit2,
+  FiTrash2,
+  FiPlus,
+  FiRefreshCw,
+  FiUploadCloud,
+  FiUser,
+  FiX,
+} from "react-icons/fi";
 import { getAll, create, patch, remove } from "../services/crud";
 import { resolveImageUrl } from "../../services/publicApi";
+
+const PRIMARY = "#4545A5";
+const PRIMARY_DARK = "#353584";
 
 const emptyForm = {
   name: "",
@@ -47,13 +59,17 @@ export default function PlacementList() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [brokenImages, setBrokenImages] = useState({});
 
   async function loadStudents() {
     setLoading(true);
     setError("");
+
     try {
       const data = await getAll("placements");
       setStudents(Array.isArray(data) ? data : data.results ?? []);
+      setBrokenImages({});
     } catch (err) {
       setError(err.message || "Failed to load placements.");
     } finally {
@@ -67,11 +83,16 @@ export default function PlacementList() {
 
   function changeField(e) {
     const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   }
 
   function pickImage(e) {
     const file = e.target.files?.[0] || null;
+
+    if (imagePreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(imagePreview);
+    }
+
     setImage(file);
     setImagePreview(file ? URL.createObjectURL(file) : null);
   }
@@ -88,17 +109,22 @@ export default function PlacementList() {
 
   function openEdit(student) {
     setEditingId(student.id);
+
     setForm({
       name: student.name || "",
       role: student.role || "",
       batch: student.batch || "",
-      order: student.order || 0,
+      order: student.order ?? 0,
       meta_title: student.meta_title || "",
       meta_description: student.meta_description || "",
       meta_keywords: student.meta_keywords || "",
     });
+
     setImage(null);
-    setImagePreview(student.image || null);
+    setImagePreview(
+      student.image ? resolveImageUrl(student.image) : null
+    );
+
     setError("");
     setSuccess("");
     setFormOpen(true);
@@ -106,6 +132,11 @@ export default function PlacementList() {
 
   function closeForm() {
     if (saving) return;
+
+    if (imagePreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(imagePreview);
+    }
+
     setFormOpen(false);
     setEditingId(null);
     setForm({ ...emptyForm });
@@ -116,11 +147,28 @@ export default function PlacementList() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+
+    if (
+      !form.name.trim() ||
+      !form.role.trim() ||
+      !form.batch.trim()
+    ) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
     setSaving(true);
     setError("");
+
     const formData = new FormData();
-    Object.entries(form).forEach(([k, v]) => formData.append(k, v));
-    if (image) formData.append("image", image);
+
+    Object.entries(form).forEach(([key, value]) => {
+      formData.append(key, value ?? "");
+    });
+
+    if (image) {
+      formData.append("image", image);
+    }
 
     try {
       if (editingId !== null) {
@@ -131,11 +179,16 @@ export default function PlacementList() {
         setSuccess("Student added successfully.");
       }
 
+      if (imagePreview?.startsWith("blob:")) {
+        URL.revokeObjectURL(imagePreview);
+      }
+
       setFormOpen(false);
       setEditingId(null);
       setForm({ ...emptyForm });
       setImage(null);
       setImagePreview(null);
+
       await loadStudents();
     } catch (err) {
       setError(err.message || "Unable to save the student.");
@@ -145,7 +198,9 @@ export default function PlacementList() {
   }
 
   async function handleDelete() {
-    if (!deleteTarget) return;
+    if (!deleteTarget || deleting) return;
+
+    setDeleting(true);
 
     try {
       await remove("placements", deleteTarget.id);
@@ -155,80 +210,123 @@ export default function PlacementList() {
     } catch (err) {
       setError(err.message || "Unable to delete the student.");
       setDeleteTarget(null);
+    } finally {
+      setDeleting(false);
     }
   }
 
   return (
     <VStack align="stretch" gap="24px">
-      {/* HEADER */}
+
+      {/* PAGE HEADER */}
       <Flex
         justify="space-between"
         align={{ base: "stretch", md: "center" }}
         direction={{ base: "column", md: "row" }}
-        gap="14px"
+        gap="16px"
       >
         <Box>
-          <Heading size="lg" color="#20243A">
+          <Heading size="lg" color="#20243A" fontWeight="bold">
             Placement Management
           </Heading>
-          <Text color="gray.500" mt="8px">
+
+          <Text color="gray.500" fontSize="sm" mt="8px">
             Manage the students displayed on the public Placements page.
           </Text>
         </Box>
 
-        <HStack gap="10px">
+        <HStack gap="12px" flexWrap="wrap">
           <Button
             variant="outline"
-            borderRadius="10px"
+            borderRadius="11px"
+            px="20px"
+            h="46px"
+            fontWeight="semibold"
+            borderColor="gray.300"
             onClick={loadStudents}
             loading={loading}
+            _hover={{ bg: "gray.50", borderColor: PRIMARY }}
           >
-            <FiRefreshCw /> Refresh
+            <FiRefreshCw />
+            Refresh
           </Button>
 
           <Button
-            bg="#4545A5"
+            bg={PRIMARY}
             color="white"
-            _hover={{ bg: "#353584" }}
-            borderRadius="10px"
+            borderRadius="11px"
+            px="26px"
+            h="48px"
+            minW="170px"
+            fontWeight="semibold"
+            fontSize="sm"
+            boxShadow="0 5px 14px rgba(69,69,165,0.22)"
             onClick={openCreate}
-            boxShadow="md"
+            _hover={{
+              bg: PRIMARY_DARK,
+              transform: "translateY(-2px)",
+              boxShadow: "0 8px 18px rgba(69,69,165,0.28)",
+            }}
+            transition="all .2s ease"
           >
-            <FiPlus /> Add Student
+            <FiPlus size={18} />
+            Add Student
           </Button>
         </HStack>
       </Flex>
 
-      {/* ALERTS */}
+      {/* ALERT MESSAGES */}
       {success && (
-        <Box
+        <Flex
           bg="green.50"
           border="1px solid"
           borderColor="green.200"
           color="green.700"
-          p="12px 16px"
-          borderRadius="10px"
-          fontSize="sm"
+          px="16px"
+          py="13px"
+          borderRadius="12px"
+          align="center"
+          justify="space-between"
         >
-          {success}
-        </Box>
+          <Text fontSize="sm" fontWeight="medium">
+            {success}
+          </Text>
+
+          <Button
+            size="xs"
+            variant="ghost"
+            onClick={() => setSuccess("")}
+          >
+            <FiX />
+          </Button>
+        </Flex>
       )}
 
-      {error && (
-        <Box
+      {error && !formOpen && (
+        <Flex
           bg="red.50"
           border="1px solid"
           borderColor="red.200"
           color="red.700"
-          p="12px 16px"
-          borderRadius="10px"
-          fontSize="sm"
+          px="16px"
+          py="13px"
+          borderRadius="12px"
+          align="center"
+          justify="space-between"
         >
-          {error}
-        </Box>
+          <Text fontSize="sm">{error}</Text>
+
+          <Button
+            size="xs"
+            variant="ghost"
+            onClick={() => setError("")}
+          >
+            <FiX />
+          </Button>
+        </Flex>
       )}
 
-      {/* STYLED LIST WINDOW */}
+      {/* PLACEMENT LIST */}
       <Box
         bg="white"
         p={{ base: "18px", md: "26px" }}
@@ -237,8 +335,13 @@ export default function PlacementList() {
         borderColor="gray.200"
         boxShadow="sm"
       >
-        {/* List Header */}
-        <Flex justify="space-between" align="center" mb="24px">
+        <Flex
+          justify="space-between"
+          align="center"
+          mb="24px"
+          flexWrap="wrap"
+          gap="12px"
+        >
           <HStack gap="12px">
             <Heading size="md" color="#20243A">
               Placed Students
@@ -246,22 +349,23 @@ export default function PlacementList() {
 
             <Badge
               bg="#EEEEFB"
-              color="#4545A5"
-              px="10px"
-              py="4px"
+              color={PRIMARY}
+              px="12px"
+              py="5px"
               borderRadius="full"
-              fontSize="sm"
+              fontSize="xs"
+              fontWeight="bold"
             >
-              {students.length} total
+              {students.length} Total
             </Badge>
           </HStack>
         </Flex>
 
-        {/* Loading / Empty / Grid State */}
+        {/* LOADING */}
         {loading ? (
           <SimpleGrid
             columns={{ base: 1, md: 2, xl: 3, "2xl": 4 }}
-            gap="24px"
+            gap="22px"
           >
             {[1, 2, 3, 4].map((i) => (
               <Box
@@ -271,17 +375,18 @@ export default function PlacementList() {
                 borderRadius="16px"
                 overflow="hidden"
               >
-                <Skeleton height="160px" />
+                <Skeleton height="180px" />
                 <Box p="20px">
                   <Skeleton height="20px" mb="12px" width="60%" />
                   <Skeleton height="16px" width="80%" />
+                  <Skeleton height="35px" mt="18px" />
                 </Box>
               </Box>
             ))}
           </SimpleGrid>
         ) : students.length === 0 ? (
           <VStack
-            py="60px"
+            py="65px"
             gap="16px"
             bg="gray.50"
             borderRadius="16px"
@@ -289,41 +394,44 @@ export default function PlacementList() {
             borderColor="gray.300"
           >
             <Flex
-              w="64px"
-              h="64px"
+              w="68px"
+              h="68px"
               borderRadius="full"
               bg="#EEEEFB"
-              color="#4545A5"
+              color={PRIMARY}
               align="center"
               justify="center"
             >
-              <Icon as={FiUser} boxSize="32px" />
+              <Icon as={FiUser} boxSize="30px" />
             </Flex>
 
             <Box textAlign="center">
               <Text fontWeight="bold" color="#20243A" fontSize="lg">
                 No students added yet
               </Text>
-              <Text color="gray.500" fontSize="sm" mt="4px">
+
+              <Text color="gray.500" fontSize="sm" mt="5px">
                 Add your first placed student to get started.
               </Text>
             </Box>
 
             <Button
-              bg="#4545A5"
+              bg={PRIMARY}
               color="white"
-              _hover={{ bg: "#353584" }}
+              px="24px"
+              h="44px"
               borderRadius="10px"
               onClick={openCreate}
-              mt="2"
+              _hover={{ bg: PRIMARY_DARK }}
             >
-              <FiPlus /> Add Student
+              <FiPlus />
+              Add Student
             </Button>
           </VStack>
         ) : (
           <SimpleGrid
             columns={{ base: 1, md: 2, xl: 3, "2xl": 4 }}
-            gap="24px"
+            gap="22px"
           >
             {students.map((student) => (
               <Box
@@ -342,7 +450,7 @@ export default function PlacementList() {
                   transform: "translateY(-4px)",
                 }}
               >
-                {/* Image Container with Overlay */}
+                {/* STUDENT IMAGE */}
                 <Box
                   position="relative"
                   h="180px"
@@ -352,7 +460,7 @@ export default function PlacementList() {
                   justifyContent="center"
                   alignItems="center"
                 >
-                  {student.image ? (
+                  {student.image && !brokenImages[student.id] ? (
                     <Image
                       src={resolveImageUrl(student.image)}
                       alt={student.name}
@@ -363,6 +471,12 @@ export default function PlacementList() {
                       boxShadow="md"
                       transition="transform .4s ease"
                       _groupHover={{ transform: "scale(1.05)" }}
+                      onError={() =>
+                        setBrokenImages((prev) => ({
+                          ...prev,
+                          [student.id]: true,
+                        }))
+                      }
                     />
                   ) : (
                     <Flex
@@ -377,7 +491,7 @@ export default function PlacementList() {
                     </Flex>
                   )}
 
-                  {/* Dark Gradient Overlay & Actions */}
+                  {/* HOVER OVERLAY */}
                   <Box
                     position="absolute"
                     inset="0"
@@ -392,8 +506,8 @@ export default function PlacementList() {
                     top="12px"
                     right="12px"
                     gap="8px"
-                    opacity={0}
-                    transform="translateY(-10px)"
+                    opacity={{ base: 1, md: 0 }}
+                    transform={{ base: "none", md: "translateY(-10px)" }}
                     _groupHover={{
                       opacity: 1,
                       transform: "translateY(0)",
@@ -402,43 +516,54 @@ export default function PlacementList() {
                   >
                     <IconButton
                       size="sm"
-                      aria-label="Edit"
+                      aria-label="Edit student"
                       bg="white"
-                      color="#4545A5"
+                      color={PRIMARY}
                       borderRadius="8px"
                       boxShadow="lg"
-                      _hover={{ bg: "#EEEEFB", transform: "scale(1.05)" }}
                       onClick={() => openEdit(student)}
+                      _hover={{
+                        bg: "#EEEEFB",
+                        transform: "scale(1.05)",
+                      }}
                     >
                       <FiEdit2 />
                     </IconButton>
 
                     <IconButton
                       size="sm"
-                      aria-label="Delete"
+                      aria-label="Delete student"
                       bg="white"
                       color="#DB2777"
                       borderRadius="8px"
                       boxShadow="lg"
-                      _hover={{ bg: "#FDECF3", transform: "scale(1.05)" }}
                       onClick={() => setDeleteTarget(student)}
+                      _hover={{
+                        bg: "#FDECF3",
+                        transform: "scale(1.05)",
+                      }}
                     >
                       <FiTrash2 />
                     </IconButton>
                   </HStack>
                 </Box>
 
-                {/* Content Container */}
+                {/* STUDENT DETAILS */}
                 <Box p="20px" textAlign="center">
-                  <Heading size="md" color="#20243A" noOfLines={1} mb="4px">
+                  <Heading
+                    size="md"
+                    color="#20243A"
+                    noOfLines={1}
+                    mb="5px"
+                  >
                     {student.name}
                   </Heading>
 
                   <Text
                     fontSize="sm"
-                    color="#4545A5"
+                    color={PRIMARY}
                     fontWeight="medium"
-                    noOfLines={1}
+                    noOfLines={2}
                     mb="12px"
                   >
                     {student.role}
@@ -447,8 +572,8 @@ export default function PlacementList() {
                   <Badge
                     bg="gray.100"
                     color="gray.600"
-                    px="10px"
-                    py="3px"
+                    px="12px"
+                    py="4px"
                     borderRadius="md"
                     fontSize="xs"
                   >
@@ -461,32 +586,39 @@ export default function PlacementList() {
                     <Button
                       size="sm"
                       variant="outline"
-                      borderRadius="8px"
+                      borderRadius="9px"
+                      h="38px"
                       flex="1"
+                      fontWeight="semibold"
+                      borderColor="gray.200"
                       onClick={() => openEdit(student)}
                       _hover={{
                         bg: "#EEEEFB",
-                        borderColor: "#4545A5",
-                        color: "#4545A5",
+                        borderColor: PRIMARY,
+                        color: PRIMARY,
                       }}
                     >
-                      <FiEdit2 /> Edit
+                      <FiEdit2 />
+                      Edit
                     </Button>
 
                     <Button
                       size="sm"
                       variant="outline"
-                      borderRadius="8px"
+                      borderRadius="9px"
+                      h="38px"
+                      flex="1"
+                      fontWeight="semibold"
                       color="#DB2777"
                       borderColor="red.200"
+                      onClick={() => setDeleteTarget(student)}
                       _hover={{
                         bg: "#FDECF3",
                         borderColor: "#DB2777",
                       }}
-                      flex="1"
-                      onClick={() => setDeleteTarget(student)}
                     >
-                      <FiTrash2 /> Delete
+                      <FiTrash2 />
+                      Delete
                     </Button>
                   </HStack>
                 </Box>
@@ -496,7 +628,7 @@ export default function PlacementList() {
         )}
       </Box>
 
-      {/* CREATE / EDIT MODAL */}
+      {/* ADD / EDIT DIALOG */}
       <Dialog.Root
         open={formOpen}
         onOpenChange={(e) => !e.open && closeForm()}
@@ -506,31 +638,62 @@ export default function PlacementList() {
         <Portal>
           <Dialog.Backdrop
             bg="blackAlpha.700"
-            backdropFilter="blur(4px)"
+            backdropFilter="blur(5px)"
           />
 
-          <Dialog.Positioner>
-            <Dialog.Content borderRadius="20px" my="40px" boxShadow="2xl">
+          <Dialog.Positioner p="16px">
+            <Dialog.Content
+              maxW="650px"
+              w="100%"
+              borderRadius="20px"
+              overflow="hidden"
+              boxShadow="2xl"
+              my="auto"
+            >
+              {/* MODAL HEADER */}
               <Dialog.Header
+                px={{ base: "22px", md: "30px" }}
+                pt="26px"
+                pb="20px"
                 borderBottom="1px solid"
                 borderColor="gray.100"
-                pb="16px"
-                pt="24px"
-                px={{ base: "24px", md: "32px" }}
               >
-                <Dialog.Title
-                  color="#20243A"
-                  fontSize="2xl"
-                  fontWeight="bold"
-                >
-                  {editingId !== null
-                    ? "Edit Placed Student"
-                    : "Add Placed Student"}
-                </Dialog.Title>
+                <HStack gap="14px" align="center">
+                  <Flex
+                    w="46px"
+                    h="46px"
+                    flexShrink="0"
+                    borderRadius="12px"
+                    bg="#EEEEFB"
+                    color={PRIMARY}
+                    align="center"
+                    justify="center"
+                  >
+                    {editingId !== null ? (
+                      <Icon as={FiEdit2} boxSize="21px" />
+                    ) : (
+                      <Icon as={FiUser} boxSize="22px" />
+                    )}
+                  </Flex>
 
-                <Text fontSize="sm" color="gray.500" mt="1">
-                  Fill in the details below to update the placements page.
-                </Text>
+                  <Box>
+                    <Dialog.Title
+                      color="#20243A"
+                      fontSize="xl"
+                      fontWeight="bold"
+                    >
+                      {editingId !== null
+                        ? "Edit Placed Student"
+                        : "Add New Student"}
+                    </Dialog.Title>
+
+                    <Text color="gray.500" fontSize="sm" mt="4px">
+                      {editingId !== null
+                        ? "Update the student's placement information."
+                        : "Enter the student details to add a placement."}
+                    </Text>
+                  </Box>
+                </HStack>
               </Dialog.Header>
 
               <Dialog.CloseTrigger asChild>
@@ -541,245 +704,395 @@ export default function PlacementList() {
                   borderRadius="full"
                   bg="gray.50"
                   _hover={{ bg: "gray.100" }}
+                  disabled={saving}
                 />
               </Dialog.CloseTrigger>
 
+              {/* MODAL BODY */}
               <Dialog.Body
-                pt="24px"
-                px={{ base: "24px", md: "32px" }}
+                px={{ base: "22px", md: "30px" }}
+                py="26px"
               >
+                {error && (
+                  <Box
+                    bg="red.50"
+                    color="red.700"
+                    border="1px solid"
+                    borderColor="red.200"
+                    borderRadius="10px"
+                    p="12px"
+                    fontSize="sm"
+                    mb="20px"
+                  >
+                    {error}
+                  </Box>
+                )}
+
                 <Box
                   as="form"
                   id="placement-form"
                   onSubmit={handleSubmit}
                 >
                   <VStack align="stretch" gap="24px">
-                    {/* BASIC INFO */}
+
+                    {/* BASIC INFORMATION */}
                     <Box>
                       <Text
                         fontSize="xs"
                         fontWeight="bold"
-                        color="#4545A5"
+                        color={PRIMARY}
                         textTransform="uppercase"
                         letterSpacing="wider"
-                        mb="16px"
+                        mb="18px"
                       >
-                        1. Basic Information
+                        01. Student Information
                       </Text>
 
-                      <Field.Root>
-                        <Field.Label
-                          fontWeight="semibold"
-                          color="#34384D"
-                        >
-                          Student Photo
-                        </Field.Label>
+                      <VStack align="stretch" gap="20px">
 
-                        <Box
-                          border="2px dashed"
-                          borderColor={imagePreview ? "#4545A5" : "gray.300"}
-                          borderRadius="12px"
-                          bg={imagePreview ? "#F8F8FF" : "gray.50"}
-                          p="24px"
-                          textAlign="center"
-                          cursor="pointer"
-                          position="relative"
-                          transition="all .2s ease"
-                          _hover={{
-                            borderColor: "#4545A5",
-                            bg: "#F8F8FF",
-                          }}
-                          onClick={() =>
-                            document.getElementById("file-upload").click()
-                          }
-                        >
-                          <Input
-                            id="file-upload"
-                            type="file"
-                            accept="image/*"
-                            display="none"
-                            onChange={pickImage}
-                          />
+                        {/* PHOTO UPLOAD */}
+                        <Field.Root>
+                          <Field.Label
+                            color="#34384D"
+                            fontWeight="semibold"
+                            fontSize="sm"
+                            mb="7px"
+                          >
+                            Student Photo
+                          </Field.Label>
 
-                          {imagePreview ? (
-                            <Box
-                              display="flex"
-                              flexDirection="column"
-                              alignItems="center"
-                            >
-                              <Image
-                                src={
-                                  imagePreview.startsWith("blob:")
-                                    ? imagePreview
-                                    : resolveImageUrl(imagePreview)
-                                }
-                                alt="Preview"
-                                boxSize="120px"
-                                borderRadius="full"
-                                objectFit="cover"
-                                border="3px solid white"
-                                boxShadow="md"
-                              />
+                          <Box
+                            border="2px dashed"
+                            borderColor={
+                              imagePreview ? PRIMARY : "gray.300"
+                            }
+                            borderRadius="14px"
+                            bg={imagePreview ? "#F8F8FF" : "gray.50"}
+                            p="22px"
+                            textAlign="center"
+                            cursor="pointer"
+                            transition="all .2s ease"
+                            _hover={{
+                              borderColor: PRIMARY,
+                              bg: "#F8F8FF",
+                            }}
+                            onClick={() =>
+                              document
+                                .getElementById("placement-upload")
+                                ?.click()
+                            }
+                          >
+                            <Input
+                              id="placement-upload"
+                              type="file"
+                              accept="image/*"
+                              display="none"
+                              onChange={pickImage}
+                            />
 
-                              <Text
-                                mt="3"
-                                fontSize="sm"
-                                color="#4545A5"
-                                fontWeight="medium"
-                              >
-                                Click to change photo
-                              </Text>
-                            </Box>
-                          ) : (
-                            <VStack gap="10px" py="10px">
-                              <Flex
-                                w="48px"
-                                h="48px"
-                                borderRadius="full"
-                                bg="#EEEEFB"
-                                color="#4545A5"
-                                align="center"
-                                justify="center"
-                              >
-                                <Icon as={FiUploadCloud} boxSize="24px" />
-                              </Flex>
+                            {imagePreview ? (
+                              <VStack gap="12px">
+                                <Image
+                                  src={imagePreview}
+                                  alt="Student preview"
+                                  boxSize="110px"
+                                  borderRadius="full"
+                                  objectFit="cover"
+                                  border="3px solid white"
+                                  boxShadow="md"
+                                  mx="auto"
+                                />
 
-                              <Box>
                                 <Text
+                                  color={PRIMARY}
                                   fontWeight="semibold"
-                                  color="#34384D"
+                                  fontSize="sm"
                                 >
-                                  Click to upload photo
+                                  Click to change student photo
                                 </Text>
-                                <Text fontSize="sm" color="gray.500">
-                                  Square images work best (max 2MB)
-                                </Text>
-                              </Box>
-                            </VStack>
-                          )}
-                        </Box>
-                      </Field.Root>
+                              </VStack>
+                            ) : (
+                              <VStack gap="10px" py="12px">
+                                <Flex
+                                  w="48px"
+                                  h="48px"
+                                  borderRadius="full"
+                                  bg="#EEEEFB"
+                                  color={PRIMARY}
+                                  align="center"
+                                  justify="center"
+                                >
+                                  <Icon
+                                    as={FiUploadCloud}
+                                    boxSize="23px"
+                                  />
+                                </Flex>
 
-                      <Field.Root required mt="20px">
-                        <Field.Label
-                          fontWeight="semibold"
-                          color="#34384D"
-                        >
-                          Student Name
-                        </Field.Label>
+                                <Box>
+                                  <Text
+                                    fontWeight="semibold"
+                                    color="#34384D"
+                                    fontSize="sm"
+                                  >
+                                    Click to upload student photo
+                                  </Text>
 
-                        <Input
-                          name="name"
-                          value={form.name}
-                          onChange={changeField}
-                          // placeholder="e.g. Rahul Sharma"
-                          borderRadius="10px"
-                          size="lg"
-                          required
-                          _focus={{
-                            borderColor: "#4545A5",
-                            boxShadow: "0 0 0 1px #4545A5",
-                          }}
-                        />
-                      </Field.Root>
+                                  <Text
+                                    fontSize="xs"
+                                    color="gray.500"
+                                    mt="5px"
+                                  >
+                                    PNG, JPG or JPEG
+                                  </Text>
+                                </Box>
+                              </VStack>
+                            )}
+                          </Box>
+                        </Field.Root>
 
-                      <Field.Root required mt="20px">
-                        <Field.Label
-                          fontWeight="semibold"
-                          color="#34384D"
-                        >
-                          Role & Company
-                        </Field.Label>
-
-                        <Input
-                          name="role"
-                          value={form.role}
-                          onChange={changeField}
-                          placeholder="e.g. Frontend Developer @ Infosys"
-                          borderRadius="10px"
-                          required
-                          _focus={{
-                            borderColor: "#4545A5",
-                            boxShadow: "0 0 0 1px #4545A5",
-                          }}
-                        />
-                      </Field.Root>
-
-                      <HStack gap="20px" align="flex-start" mt="20px">
-                        <Field.Root required flex="1">
+                        {/* STUDENT NAME */}
+                        <Field.Root required>
                           <Field.Label
-                            fontWeight="semibold"
                             color="#34384D"
+                            fontWeight="semibold"
+                            fontSize="sm"
+                            mb="7px"
                           >
-                            Batch
+                            Student Name
                           </Field.Label>
 
                           <Input
-                            name="batch"
-                            value={form.batch}
+                            name="name"
+                            value={form.name}
                             onChange={changeField}
-                            placeholder="e.g. Batch 2024"
+                            placeholder="Enter student name"
                             borderRadius="10px"
+                            h="46px"
+                            borderColor="gray.300"
+                            _focus={{
+                              borderColor: PRIMARY,
+                              boxShadow: `0 0 0 1px ${PRIMARY}`,
+                            }}
                             required
-                            _focus={{
-                              borderColor: "#4545A5",
-                              boxShadow: "0 0 0 1px #4545A5",
-                            }}
                           />
                         </Field.Root>
 
-                        <Field.Root flex="1">
+                        {/* ROLE */}
+                        <Field.Root required>
                           <Field.Label
-                            fontWeight="semibold"
                             color="#34384D"
+                            fontWeight="semibold"
+                            fontSize="sm"
+                            mb="7px"
                           >
-                            Display Order
+                            Role & Company
                           </Field.Label>
 
                           <Input
-                            name="order"
-                            type="number"
-                            value={form.order}
+                            name="role"
+                            value={form.role}
                             onChange={changeField}
-                            placeholder="0"
+                            placeholder="e.g. Frontend Developer @ Infosys"
                             borderRadius="10px"
+                            h="46px"
+                            borderColor="gray.300"
                             _focus={{
-                              borderColor: "#4545A5",
-                              boxShadow: "0 0 0 1px #4545A5",
+                              borderColor: PRIMARY,
+                              boxShadow: `0 0 0 1px ${PRIMARY}`,
                             }}
+                            required
                           />
-
-                          <Text fontSize="xs" color="gray.500" mt="1">
-                            Lower numbers appear first.
-                          </Text>
                         </Field.Root>
-                      </HStack>
+
+                        {/* BATCH AND ORDER */}
+                        <SimpleGrid columns={{ base: 1, sm: 2 }} gap="16px">
+                          <Field.Root required>
+                            <Field.Label
+                              color="#34384D"
+                              fontWeight="semibold"
+                              fontSize="sm"
+                              mb="7px"
+                            >
+                              Batch
+                            </Field.Label>
+
+                            <Input
+                              name="batch"
+                              value={form.batch}
+                              onChange={changeField}
+                              placeholder="e.g. Batch 2024"
+                              borderRadius="10px"
+                              h="46px"
+                              borderColor="gray.300"
+                              _focus={{
+                                borderColor: PRIMARY,
+                                boxShadow: `0 0 0 1px ${PRIMARY}`,
+                              }}
+                              required
+                            />
+                          </Field.Root>
+
+                          <Field.Root>
+                            <Field.Label
+                              color="#34384D"
+                              fontWeight="semibold"
+                              fontSize="sm"
+                              mb="7px"
+                            >
+                              Display Order
+                            </Field.Label>
+
+                            <Input
+                              name="order"
+                              type="number"
+                              value={form.order}
+                              onChange={changeField}
+                              placeholder="0"
+                              borderRadius="10px"
+                              h="46px"
+                              borderColor="gray.300"
+                              _focus={{
+                                borderColor: PRIMARY,
+                                boxShadow: `0 0 0 1px ${PRIMARY}`,
+                              }}
+                            />
+
+                            <Text fontSize="xs" color="gray.500" mt="6px">
+                              Lower numbers appear first.
+                            </Text>
+                          </Field.Root>
+                        </SimpleGrid>
+                      </VStack>
                     </Box>
 
                     <Separator borderColor="gray.100" />
 
-                    
+                    {/* SEO INFORMATION */}
+                    <Box>
+                      <Text
+                        fontSize="xs"
+                        fontWeight="bold"
+                        color={PRIMARY}
+                        textTransform="uppercase"
+                        letterSpacing="wider"
+                        mb="18px"
+                      >
+                        02. SEO Information
+                      </Text>
+
+                      <VStack align="stretch" gap="18px">
+                        <Field.Root>
+                          <Field.Label
+                            color="#34384D"
+                            fontWeight="semibold"
+                            fontSize="sm"
+                            mb="7px"
+                          >
+                            Meta Title
+                          </Field.Label>
+
+                          <Input
+                            name="meta_title"
+                            value={form.meta_title}
+                            onChange={changeField}
+                            placeholder="Enter SEO title"
+                            borderRadius="10px"
+                            h="46px"
+                            borderColor="gray.300"
+                            _focus={{
+                              borderColor: PRIMARY,
+                              boxShadow: `0 0 0 1px ${PRIMARY}`,
+                            }}
+                          />
+
+                          <Text fontSize="xs" color="gray.500" mt="5px">
+                            Recommended: up to 60 characters.
+                          </Text>
+                        </Field.Root>
+
+                        <Field.Root>
+                          <Field.Label
+                            color="#34384D"
+                            fontWeight="semibold"
+                            fontSize="sm"
+                            mb="7px"
+                          >
+                            Meta Description
+                          </Field.Label>
+
+                          <Textarea
+                            name="meta_description"
+                            value={form.meta_description}
+                            onChange={changeField}
+                            placeholder="Enter SEO description"
+                            borderRadius="10px"
+                            minH="90px"
+                            resize="vertical"
+                            borderColor="gray.300"
+                            _focus={{
+                              borderColor: PRIMARY,
+                              boxShadow: `0 0 0 1px ${PRIMARY}`,
+                            }}
+                          />
+
+                          <Text fontSize="xs" color="gray.500" mt="5px">
+                            Recommended: up to 160 characters.
+                          </Text>
+                        </Field.Root>
+
+                        <Field.Root>
+                          <Field.Label
+                            color="#34384D"
+                            fontWeight="semibold"
+                            fontSize="sm"
+                            mb="7px"
+                          >
+                            Meta Keywords
+                          </Field.Label>
+
+                          <Input
+                            name="meta_keywords"
+                            value={form.meta_keywords}
+                            onChange={changeField}
+                            placeholder="e.g. placements, students, careers"
+                            borderRadius="10px"
+                            h="46px"
+                            borderColor="gray.300"
+                            _focus={{
+                              borderColor: PRIMARY,
+                              boxShadow: `0 0 0 1px ${PRIMARY}`,
+                            }}
+                          />
+                        </Field.Root>
+                      </VStack>
+                    </Box>
                   </VStack>
                 </Box>
               </Dialog.Body>
 
+              {/* MODAL FOOTER */}
               <Dialog.Footer
+                px={{ base: "22px", md: "30px" }}
+                py="20px"
                 borderTop="1px solid"
                 borderColor="gray.100"
-                pt="20px"
-                pb="24px"
-                px={{ base: "24px", md: "32px" }}
                 bg="gray.50"
-                borderBottomRadius="20px"
               >
-                <HStack gap="12px" w="100%" justifyContent="flex-end">
+                <Flex
+                  w="100%"
+                  gap="12px"
+                  justify="flex-end"
+                  direction={{ base: "column-reverse", sm: "row" }}
+                >
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     borderRadius="10px"
+                    h="44px"
+                    px="24px"
+                    borderColor="gray.300"
                     onClick={closeForm}
                     disabled={saving}
-                    color="gray.600"
-                    _hover={{ bg: "gray.200" }}
+                    _hover={{ bg: "gray.100" }}
                   >
                     Cancel
                   </Button>
@@ -787,53 +1100,64 @@ export default function PlacementList() {
                   <Button
                     type="submit"
                     form="placement-form"
-                    bg="#4545A5"
+                    bg={PRIMARY}
                     color="white"
                     borderRadius="10px"
+                    h="44px"
+                    px="28px"
+                    fontWeight="semibold"
                     loading={saving}
                     disabled={saving}
-                    _hover={{ bg: "#353584" }}
-                    boxShadow="md"
-                    px="8"
+                    _hover={{ bg: PRIMARY_DARK }}
                   >
-                    {editingId !== null ? "Save Changes" : "Add Student"}
+                    {editingId !== null ? (
+                      <>
+                        <FiEdit2 />
+                        Save Changes
+                      </>
+                    ) : (
+                      <>
+                        <FiPlus />
+                        Add Student
+                      </>
+                    )}
                   </Button>
-                </HStack>
+                </Flex>
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
         </Portal>
       </Dialog.Root>
 
-      {/* DELETE MODAL */}
+      {/* DELETE CONFIRMATION */}
       <Dialog.Root
         open={Boolean(deleteTarget)}
-        onOpenChange={(e) => !e.open && setDeleteTarget(null)}
+        onOpenChange={(e) => !e.open && !deleting && setDeleteTarget(null)}
         role="alertdialog"
         size="md"
       >
         <Portal>
           <Dialog.Backdrop
             bg="blackAlpha.600"
-            backdropFilter="blur(3px)"
+            backdropFilter="blur(4px)"
           />
 
-          <Dialog.Positioner>
+          <Dialog.Positioner p="16px">
             <Dialog.Content
-              maxW={{ base: "calc(100% - 32px)", sm: "460px" }}
+              maxW="460px"
+              w="100%"
               borderRadius="20px"
               overflow="hidden"
               boxShadow="2xl"
               p="0"
             >
-              {/* HEADER */}
               <Dialog.Header
-                px="28px"
-                pt="28px"
+                px="26px"
+                pt="26px"
                 pb="20px"
                 display="flex"
                 alignItems="center"
-                gap="16px"
+                gap="15px"
               >
                 <Flex
                   w="52px"
@@ -863,8 +1187,7 @@ export default function PlacementList() {
                 </Box>
               </Dialog.Header>
 
-              {/* BODY */}
-              <Dialog.Body px="28px" pb="24px">
+              <Dialog.Body px="26px" pb="24px">
                 <Box
                   bg="#FFF5F8"
                   border="1px solid"
@@ -897,11 +1220,10 @@ export default function PlacementList() {
                 </Box>
               </Dialog.Body>
 
-              {/* FOOTER */}
               <Dialog.Footer
-                px="28px"
+                px="26px"
                 pt="18px"
-                pb="26px"
+                pb="24px"
                 borderTop="1px solid"
                 borderColor="gray.100"
                 bg="gray.50"
@@ -915,10 +1237,12 @@ export default function PlacementList() {
                   <Button
                     variant="outline"
                     borderRadius="10px"
+                    h="42px"
+                    px="22px"
                     borderColor="gray.300"
                     color="gray.700"
-                    w={{ base: "100%", sm: "auto" }}
                     onClick={() => setDeleteTarget(null)}
+                    disabled={deleting}
                     _hover={{ bg: "gray.100" }}
                   >
                     Cancel
@@ -928,8 +1252,11 @@ export default function PlacementList() {
                     color="white"
                     bg="#DB2777"
                     borderRadius="10px"
-                    w={{ base: "100%", sm: "auto" }}
+                    h="42px"
+                    px="22px"
                     onClick={handleDelete}
+                    loading={deleting}
+                    disabled={deleting}
                     _hover={{ bg: "#BE185D" }}
                   >
                     <FiTrash2 />

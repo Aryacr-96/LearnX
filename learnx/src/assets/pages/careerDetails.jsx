@@ -43,6 +43,17 @@ const fieldStyles = {
   _focusVisible: { borderColor: "#222222", boxShadow: "0 0 0 1px #222222" },
 };
 
+// ✅ Added CSS styles so the HTML from ReactQuill looks good
+const richTextStyles = {
+  "& p": { marginBottom: "1rem", lineHeight: "1.6", color: "#424242" },
+  "& ul": { paddingLeft: "1.5rem", marginBottom: "1rem", listStyleType: "disc" },
+  "& ol": { paddingLeft: "1.5rem", marginBottom: "1rem", listStyleType: "decimal" },
+  "& li": { marginBottom: "0.5rem", lineHeight: "1.6", color: "#424242" },
+  "& strong": { fontWeight: "bold", color: "#222222" },
+  "& h1, & h2, & h3, & h4": { fontWeight: "bold", marginTop: "1.5rem", marginBottom: "0.75rem", color: "#222222" },
+  "& a": { color: "#4545A5", textDecoration: "underline" },
+};
+
 function createCaptcha() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   return Array.from(
@@ -64,7 +75,7 @@ function CareerDetails() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState(""); // ✅ Added email state for strict validation
+  const [email, setEmail] = useState(""); 
 
   useEffect(() => {
     fetch(`${BACKEND_URL}/api/careers/`)
@@ -84,7 +95,6 @@ function CareerDetails() {
       });
   }, [jobTitle]);
 
-  // ✅ Strict Phone Handler (Only digits, max 10)
   const handlePhoneChange = (e) => {
     const numericValue = e.target.value.replace(/[^0-9]/g, "");
     if (numericValue.length <= 10) {
@@ -95,7 +105,6 @@ function CareerDetails() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // 1. Strict Email Validation Regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toaster.create({
@@ -107,7 +116,6 @@ function CareerDetails() {
       return;
     }
 
-    // 2. Validate Phone (Exactly 10 digits)
     if (phone.length !== 10) {
       toaster.create({
         title: "Invalid Phone Number",
@@ -118,7 +126,6 @@ function CareerDetails() {
       return;
     }
 
-    // 3. Validate CAPTCHA
     if (captchaInput.trim().toUpperCase() !== captcha) {
       toaster.create({
         title: "Incorrect CAPTCHA",
@@ -203,19 +210,31 @@ function CareerDetails() {
             <Flex alignItems="center" gap="9px"><Box color="#888888"><FaClock /></Box><Text>Full Time</Text></Flex>
           </Flex>
 
+          {/* ✅ CHANGED: Used dangerouslySetInnerHTML for Job Description */}
           <Box marginTop={{ base: "40px", md: "43px" }}>
             <Heading as="h2" fontSize={{ base: "21px", md: "23px" }} fontWeight="600" color="#222222" marginBottom="14px">Job Description</Heading>
-            <Text fontSize={{ base: "15px", md: "16px" }} lineHeight="1.6" color="#424242" whiteSpace="pre-line">{job.description}</Text>
+            <Box 
+              sx={richTextStyles} 
+              dangerouslySetInnerHTML={{ __html: job.description }} 
+            />
           </Box>
 
+          {/* ✅ CHANGED: Used dangerouslySetInnerHTML for Key Responsibilities */}
           <Box marginTop={{ base: "37px", md: "41px" }}>
             <Heading as="h2" fontSize={{ base: "21px", md: "23px" }} fontWeight="600" color="#222222" marginBottom="12px">Key Responsibilities</Heading>
-            <Text fontSize={{ base: "15px", md: "16px" }} lineHeight="1.6" color="#424242" whiteSpace="pre-line">{job.responsibilities}</Text>
+            <Box 
+              sx={richTextStyles} 
+              dangerouslySetInnerHTML={{ __html: job.responsibilities }} 
+            />
           </Box>
 
+          {/* ✅ CHANGED: Used dangerouslySetInnerHTML for Requirements */}
           <Box marginTop={{ base: "35px", md: "39px" }}>
             <Heading as="h2" fontSize={{ base: "21px", md: "23px" }} fontWeight="600" color="#222222" marginBottom="12px">Requirements</Heading>
-            <Text fontSize={{ base: "15px", md: "16px" }} lineHeight="1.6" color="#424242" whiteSpace="pre-line">{job.requirements}</Text>
+            <Box 
+              sx={richTextStyles} 
+              dangerouslySetInnerHTML={{ __html: job.requirements }} 
+            />
           </Box>
         </Container>
       </Box>
@@ -242,7 +261,6 @@ function CareerDetails() {
               <SimpleGrid columns={{ base: 1, md: 2 }} gap={{ base: "16px", md: "21px" }}>
                 <Input {...fieldStyles} name="name" placeholder="Name" required />
                 
-                {/* ✅ Email with state and onChange */}
                 <Input 
                   {...fieldStyles} 
                   name="email" 

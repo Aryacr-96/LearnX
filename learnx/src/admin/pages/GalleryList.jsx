@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import {
   Box,
@@ -7,15 +6,14 @@ import {
   Heading,
   Input,
   Text,
-  Textarea,
   VStack,
   HStack,
   Image,
-  Spinner,
   SimpleGrid,
   Dialog,
   Portal,
   CloseButton,
+  IconButton,
   Badge,
   Field,
   Separator,
@@ -39,6 +37,57 @@ const emptyForm = {
   meta_title: "",
   meta_description: "",
   meta_keywords: "",
+};
+
+/* ============================================================
+   SHARED SOFT BUTTON STYLES  (match all other lists)
+   ============================================================ */
+
+const softPrimary = {
+  bg: "#EEEEFB",
+  color: "#4545A5",
+  fontWeight: "700",
+  fontSize: "sm",
+  borderRadius: "full",
+  border: "1px solid transparent",
+  transition: "all .2s ease",
+  _hover: { bg: "#4545A5", color: "white" },
+  _active: { bg: "#353584", color: "white" },
+};
+
+const softOutline = {
+  variant: "outline",
+  borderRadius: "full",
+  border: "1px solid",
+  borderColor: "gray.200",
+  color: "gray.600",
+  fontWeight: "600",
+  fontSize: "sm",
+  bg: "white",
+  transition: "all .2s ease",
+  _hover: { bg: "gray.50", borderColor: "gray.300", color: "gray.800" },
+};
+
+const softDanger = {
+  bg: "#FDF2F8",
+  color: "#DB2777",
+  fontWeight: "700",
+  fontSize: "sm",
+  borderRadius: "full",
+  border: "1px solid transparent",
+  transition: "all .2s ease",
+  _hover: { bg: "#DB2777", color: "white" },
+};
+
+const softTeal = {
+  bg: "#E6F9F4",
+  color: "#0D9488",
+  fontWeight: "600",
+  fontSize: "sm",
+  borderRadius: "full",
+  border: "1px solid transparent",
+  transition: "all .2s ease",
+  _hover: { bg: "#0D9488", color: "white" },
 };
 
 export default function GalleryList() {
@@ -231,6 +280,7 @@ export default function GalleryList() {
 
   return (
     <VStack align="stretch" gap="24px">
+      {/* HEADER */}
       <Flex
         justify="space-between"
         align={{ base: "stretch", md: "center" }}
@@ -241,35 +291,33 @@ export default function GalleryList() {
           <Heading size="lg" color="#20243A">
             Gallery Management
           </Heading>
-
           <Text color="gray.500" mt="8px">
-            Add, edit and remove images and videos shown on your website
-            gallery.
+            Add, edit and remove images and videos shown on your website gallery.
           </Text>
         </Box>
 
         <HStack gap="10px">
           <Button
-            variant="outline"
-            borderRadius="10px"
+            {...softOutline}
             onClick={loadItems}
             loading={loading}
+            h="40px"
+            px="18px"
           >
             <FiRefreshCw /> Refresh
           </Button>
-
           <Button
-            bg="#4545A5"
-            color="white"
-            _hover={{ bg: "#353584" }}
-            borderRadius="10px"
+            {...softPrimary}
             onClick={openCreate}
+            h="40px"
+            px="20px"
           >
             <FiPlus /> Add Media
           </Button>
         </HStack>
       </Flex>
 
+      {/* ALERTS */}
       {success && (
         <Box
           bg="green.50"
@@ -277,13 +325,12 @@ export default function GalleryList() {
           borderColor="green.200"
           color="green.700"
           p="12px 16px"
-          borderRadius="10px"
+          borderRadius="12px"
           fontSize="sm"
         >
           {success}
         </Box>
       )}
-
       {error && (
         <Box
           bg="red.50"
@@ -291,7 +338,7 @@ export default function GalleryList() {
           borderColor="red.200"
           color="red.700"
           p="12px 16px"
-          borderRadius="10px"
+          borderRadius="12px"
           fontSize="sm"
         >
           {error}
@@ -312,7 +359,6 @@ export default function GalleryList() {
             <Heading size="md" color="#20243A">
               All Media
             </Heading>
-
             <Badge
               bg="#EEEEFB"
               color="#4545A5"
@@ -333,11 +379,11 @@ export default function GalleryList() {
                 key={i}
                 border="1px solid"
                 borderColor="gray.100"
-                borderRadius="14px"
+                borderRadius="16px"
                 overflow="hidden"
               >
                 <Skeleton height="190px" />
-                <Box p="14px">
+                <Box p="16px">
                   <Skeleton height="20px" mb="10px" />
                   <Skeleton height="16px" width="50%" />
                 </Box>
@@ -353,21 +399,26 @@ export default function GalleryList() {
             border="1px dashed"
             borderColor="gray.300"
           >
-            <Text fontWeight="bold" color="#20243A" fontSize="lg">
-              No gallery items yet
-            </Text>
-
-            <Text color="gray.500" fontSize="sm">
-              Upload your first image or video to get started.
-            </Text>
-
-            <Button
-              bg="#4545A5"
-              color="white"
-              _hover={{ bg: "#353584" }}
-              borderRadius="10px"
-              onClick={openCreate}
+            <Flex
+              w="64px"
+              h="64px"
+              borderRadius="full"
+              bg="#EEEEFB"
+              color="#4545A5"
+              align="center"
+              justify="center"
             >
+              <Icon as={FiPlayCircle} boxSize="32px" />
+            </Flex>
+            <Box textAlign="center">
+              <Text fontWeight="bold" color="#20243A" fontSize="lg">
+                No gallery items yet
+              </Text>
+              <Text color="gray.500" fontSize="sm" mt="4px">
+                Upload your first image or video to get started.
+              </Text>
+            </Box>
+            <Button {...softPrimary} onClick={openCreate} mt="2">
               <FiPlus /> Add Your First Media
             </Button>
           </VStack>
@@ -379,7 +430,7 @@ export default function GalleryList() {
                 role="group"
                 border="1px solid"
                 borderColor="gray.200"
-                borderRadius="14px"
+                borderRadius="16px"
                 overflow="hidden"
                 bg="white"
                 boxShadow="sm"
@@ -434,7 +485,6 @@ export default function GalleryList() {
                     </Flex>
                   )}
 
-                  {/* Overlay & Actions */}
                   <Box
                     position="absolute"
                     inset="0"
@@ -465,35 +515,33 @@ export default function GalleryList() {
                     gap="8px"
                     opacity={0}
                     transform="translateY(-10px)"
-                    _groupHover={{
-                      opacity: 1,
-                      transform: "translateY(0)",
-                    }}
+                    _groupHover={{ opacity: 1, transform: "translateY(0)" }}
                     transition="all .2s ease"
                   >
-                    <Button
+                    <IconButton
                       size="sm"
+                      aria-label="Edit"
                       bg="white"
                       color="#4545A5"
-                      borderRadius="8px"
-                      boxShadow="lg"
+                      borderRadius="full"
+                      boxShadow="md"
                       _hover={{ bg: "#EEEEFB" }}
                       onClick={() => openEdit(item)}
                     >
                       <FiEdit2 />
-                    </Button>
-
-                    <Button
+                    </IconButton>
+                    <IconButton
                       size="sm"
+                      aria-label="Delete"
                       bg="white"
                       color="#DB2777"
-                      borderRadius="8px"
-                      boxShadow="lg"
+                      borderRadius="full"
+                      boxShadow="md"
                       _hover={{ bg: "#FDECF3" }}
                       onClick={() => setDeleteTarget(item)}
                     >
                       <FiTrash2 />
-                    </Button>
+                    </IconButton>
                   </HStack>
                 </Box>
 
@@ -507,7 +555,6 @@ export default function GalleryList() {
                   >
                     {item.title}
                   </Heading>
-
                   <Text color="gray.500" fontSize="xs">
                     {item.uploaded_at
                       ? new Date(item.uploaded_at).toLocaleDateString()
@@ -518,27 +565,16 @@ export default function GalleryList() {
 
                   <HStack gap="8px">
                     <Button
+                      {...softOutline}
                       size="sm"
-                      variant="outline"
-                      borderRadius="8px"
                       flex="1"
                       onClick={() => openEdit(item)}
-                      _hover={{
-                        bg: "#EEEEFB",
-                        borderColor: "#4545A5",
-                        color: "#4545A5",
-                      }}
                     >
                       Edit
                     </Button>
-
                     <Button
+                      {...softDanger}
                       size="sm"
-                      variant="outline"
-                      borderRadius="8px"
-                      color="#DB2777"
-                      borderColor="red.200"
-                      _hover={{ bg: "#FDECF3" }}
                       flex="1"
                       onClick={() => setDeleteTarget(item)}
                     >
@@ -552,7 +588,9 @@ export default function GalleryList() {
         )}
       </Box>
 
-      {/* CREATE / EDIT MODAL */}
+      {/* ============================================================
+          CREATE / EDIT MODAL — soft floating card, pill tabs
+          ============================================================ */}
       <Dialog.Root
         open={formOpen}
         onOpenChange={(e) => !e.open && closeForm()}
@@ -560,105 +598,126 @@ export default function GalleryList() {
         scrollBehavior="inside"
       >
         <Portal>
-          <Dialog.Backdrop
-            bg="blackAlpha.700"
-            backdropFilter="blur(4px)"
-          />
-
+          <Dialog.Backdrop bg="rgba(32,36,58,0.4)" backdropFilter="blur(8px)" />
           <Dialog.Positioner>
-            <Dialog.Content borderRadius="20px" my="40px" boxShadow="2xl">
-              <Dialog.Header
-                borderBottom="1px solid"
-                borderColor="gray.100"
-                pb="16px"
-                pt="24px"
-                px={{ base: "24px", md: "32px" }}
-              >
+            <Dialog.Content
+              borderRadius="28px"
+              my="40px"
+              boxShadow="0 30px 80px rgba(32,36,58,0.18)"
+              bg="white"
+              overflow="hidden"
+            >
+              {/* HEADER — pill tabs */}
+              <Box pt="24px" px={{ base: "22px", md: "32px" }} pb="0">
+                <Flex justify="space-between" align="center" mb="18px">
+                  <HStack bg="gray.100" p="4px" borderRadius="full" gap="2px">
+                    <Box
+                      px="16px"
+                      py="6px"
+                      borderRadius="full"
+                      bg="white"
+                      boxShadow="sm"
+                      fontSize="xs"
+                      fontWeight="700"
+                      color="#4545A5"
+                    >
+                      {editingId !== null ? "Editing" : "New Media"}
+                    </Box>
+                    <Box
+                      px="16px"
+                      py="6px"
+                      borderRadius="full"
+                      fontSize="xs"
+                      fontWeight="600"
+                      color="gray.400"
+                    >
+                      Details
+                    </Box>
+                  </HStack>
+                  <Dialog.CloseTrigger asChild>
+                    <CloseButton
+                      size="sm"
+                      borderRadius="full"
+                      color="gray.400"
+                      _hover={{ bg: "gray.100", color: "gray.700" }}
+                    />
+                  </Dialog.CloseTrigger>
+                </Flex>
+
                 <Dialog.Title
                   color="#20243A"
                   fontSize="2xl"
-                  fontWeight="bold"
+                  fontWeight="700"
+                  lineHeight="1.2"
+                  letterSpacing="-0.02em"
                 >
                   {editingId !== null ? "Edit Media" : "Add New Media"}
                 </Dialog.Title>
-
-                <Text fontSize="sm" color="gray.500" mt="1">
-                  Fill in the details below to publish your media.
+                <Text fontSize="sm" color="gray.500" mt="6px" mb="20px">
+                  {editingId !== null
+                    ? "Update the details of your media below."
+                    : "Fill in the details below to publish your media."}
                 </Text>
-              </Dialog.Header>
+              </Box>
 
-              <Dialog.CloseTrigger asChild>
-                <CloseButton
-                  size="md"
-                  top="18px"
-                  right="18px"
-                  borderRadius="full"
-                  bg="gray.50"
-                  _hover={{ bg: "gray.100" }}
-                />
-              </Dialog.CloseTrigger>
-
-              <Dialog.Body
-                pt="24px"
-                px={{ base: "24px", md: "32px" }}
-              >
+              {/* BODY */}
+              <Dialog.Body pt="4px" px={{ base: "22px", md: "32px" }} pb="8px">
                 <Box as="form" id="gallery-form" onSubmit={handleSubmit}>
-                  <VStack align="stretch" gap="28px">
-                    {/* BASIC INFO */}
+                  <VStack align="stretch" gap="22px">
                     <Box>
-                      <Text
-                        fontSize="xs"
-                        fontWeight="bold"
-                        color="#4545A5"
-                        textTransform="uppercase"
-                        letterSpacing="wider"
-                        mb="16px"
-                      >
-                        1. Media Information
-                      </Text>
+                      <HStack gap="8px" mb="14px">
+                        <Box w="3px" h="14px" bg="#4545A5" borderRadius="full" />
+                        <Text
+                          fontSize="xs"
+                          fontWeight="700"
+                          color="gray.500"
+                          textTransform="uppercase"
+                          letterSpacing="wider"
+                        >
+                          Media Information
+                        </Text>
+                      </HStack>
 
-                      <VStack align="stretch" gap="20px">
+                      <VStack align="stretch" gap="18px">
                         <Field.Root required>
-                          <Field.Label
-                            fontWeight="semibold"
-                            color="#34384D"
-                          >
+                          <Field.Label fontWeight="600" color="#34384D" fontSize="sm">
                             Title
                           </Field.Label>
-
                           <Input
                             name="title"
                             value={form.title}
                             onChange={changeField}
                             placeholder="Enter title"
-                            borderRadius="10px"
-                            size="lg"
+                            borderRadius="12px"
+                            h="48px"
+                            fontSize="sm"
                             required
-                            _focus={{ borderColor: "#4545A5" }}
+                            bg="gray.50"
+                            border="1px solid"
+                            borderColor="transparent"
+                            _hover={{ borderColor: "gray.200" }}
+                            _focus={{
+                              bg: "white",
+                              borderColor: "#4545A5",
+                              boxShadow: "0 0 0 3px rgba(69,69,165,0.12)",
+                            }}
                           />
                         </Field.Root>
 
-                        {/* IMAGE UPLOAD */}
                         <Field.Root>
-                          <Field.Label
-                            fontWeight="semibold"
-                            color="#34384D"
-                          >
+                          <Field.Label fontWeight="600" color="#34384D" fontSize="sm">
                             Image File (Optional)
                           </Field.Label>
-
                           <Box
-                            border="2px dashed"
-                            borderColor={
-                              imagePreview ? "#4545A5" : "gray.300"
-                            }
-                            borderRadius="12px"
-                            bg={imagePreview ? "#F8F8FF" : "gray.50"}
+                            border="1px dashed"
+                            borderColor={imagePreview ? "#4545A5" : "gray.300"}
+                            borderRadius="16px"
+                            bg={imagePreview ? "#FAFAFF" : "gray.50"}
                             p="24px"
                             textAlign="center"
                             cursor="pointer"
-                            position="relative"
-                            _hover={{ borderColor: "#4545A5" }}
+                            transition="all .15s ease"
+                            _hover={{ borderColor: "#4545A5", bg: "#FAFAFF" }}
                             onClick={() =>
                               document.getElementById("img-upload").click()
                             }
@@ -670,11 +729,10 @@ export default function GalleryList() {
                               display="none"
                               onChange={pickImage}
                             />
-
                             {imagePreview ? (
                               <Box
                                 position="relative"
-                                borderRadius="8px"
+                                borderRadius="12px"
                                 overflow="hidden"
                               >
                                 <Image
@@ -688,64 +746,64 @@ export default function GalleryList() {
                                   h="150px"
                                   objectFit="cover"
                                 />
-
                                 <Box
                                   position="absolute"
                                   inset="0"
-                                  bg="blackAlpha.400"
+                                  bg="blackAlpha.500"
                                   display="flex"
                                   alignItems="center"
                                   justifyContent="center"
                                   opacity={0}
                                   _hover={{ opacity: 1 }}
-                                  transition="opacity .2s"
+                                  transition="opacity .15s"
                                 >
-                                  <Text color="white" fontWeight="bold">
+                                  <Text color="white" fontWeight="600" fontSize="sm">
                                     Click to change
                                   </Text>
                                 </Box>
                               </Box>
                             ) : (
-                              <VStack gap="10px" py="6px">
+                              <VStack gap="8px" py="8px">
                                 <Flex
-                                  w="40px"
-                                  h="40px"
+                                  w="48px"
+                                  h="48px"
                                   borderRadius="full"
-                                  bg="#EEEEFB"
+                                  bg="white"
+                                  border="1px solid"
+                                  borderColor="gray.200"
                                   color="#4545A5"
                                   align="center"
                                   justify="center"
                                 >
-                                  <Icon
-                                    as={FiUploadCloud}
-                                    boxSize="20px"
-                                  />
+                                  <Icon as={FiUploadCloud} boxSize="20px" />
                                 </Flex>
-
-                                <Text
-                                  fontWeight="semibold"
-                                  color="#34384D"
-                                  fontSize="sm"
-                                >
-                                  Click to upload image
-                                </Text>
+                                <Box>
+                                  <Text fontWeight="600" color="#34384D" fontSize="sm">
+                                    Click to upload image
+                                  </Text>
+                                  <Text fontSize="xs" color="gray.500" mt="2px">
+                                    SVG, PNG, JPG or GIF
+                                  </Text>
+                                </Box>
                               </VStack>
                             )}
                           </Box>
                         </Field.Root>
 
-                        <Separator />
+                        <Separator borderColor="gray.100" />
 
-                        <Text
-                          fontSize="xs"
-                          fontWeight="bold"
-                          color="#0D9488"
-                          textTransform="uppercase"
-                          letterSpacing="wider"
-                          mb="4px"
-                        >
-                          Video Settings
-                        </Text>
+                        <HStack gap="8px" mb="4px">
+                          <Box w="3px" h="14px" bg="#0D9488" borderRadius="full" />
+                          <Text
+                            fontSize="xs"
+                            fontWeight="700"
+                            color="gray.500"
+                            textTransform="uppercase"
+                            letterSpacing="wider"
+                          >
+                            Video Settings
+                          </Text>
+                        </HStack>
 
                         <HStack gap="6">
                           <label
@@ -767,7 +825,6 @@ export default function GalleryList() {
                               Upload Video File
                             </Text>
                           </label>
-
                           <label
                             style={{
                               display: "flex",
@@ -791,42 +848,43 @@ export default function GalleryList() {
 
                         {videoType === "youtube" ? (
                           <Field.Root>
-                            <Field.Label
-                              fontWeight="semibold"
-                              color="#34384D"
-                            >
+                            <Field.Label fontWeight="600" color="#34384D" fontSize="sm">
                               YouTube URL
                             </Field.Label>
-
                             <Input
                               name="youtube_url"
                               value={form.youtube_url}
                               onChange={changeField}
                               placeholder="https://youtube.com/watch?v=..."
-                              borderRadius="10px"
-                              _focus={{ borderColor: "#0D9488" }}
+                              borderRadius="12px"
+                              h="48px"
+                              fontSize="sm"
+                              bg="gray.50"
+                              border="1px solid"
+                              borderColor="transparent"
+                              _hover={{ borderColor: "gray.200" }}
+                              _focus={{
+                                bg: "white",
+                                borderColor: "#0D9488",
+                                boxShadow: "0 0 0 3px rgba(13,148,136,0.12)",
+                              }}
                             />
                           </Field.Root>
                         ) : (
                           <Field.Root>
-                            <Field.Label
-                              fontWeight="semibold"
-                              color="#34384D"
-                            >
+                            <Field.Label fontWeight="600" color="#34384D" fontSize="sm">
                               Video File
                             </Field.Label>
-
                             <Box
-                              border="2px dashed"
-                              borderColor={
-                                videoPreview ? "#0D9488" : "gray.300"
-                              }
-                              borderRadius="12px"
+                              border="1px dashed"
+                              borderColor={videoPreview ? "#0D9488" : "gray.300"}
+                              borderRadius="16px"
                               bg={videoPreview ? "#F0FDFA" : "gray.50"}
-                              p="20px"
+                              p="24px"
                               textAlign="center"
                               cursor="pointer"
-                              _hover={{ borderColor: "#0D9488" }}
+                              transition="all .15s ease"
+                              _hover={{ borderColor: "#0D9488", bg: "#F0FDFA" }}
                               onClick={() =>
                                 document.getElementById("vid-upload").click()
                               }
@@ -838,7 +896,6 @@ export default function GalleryList() {
                                 display="none"
                                 onChange={pickVideo}
                               />
-
                               {videoPreview ? (
                                 <video
                                   src={
@@ -851,63 +908,73 @@ export default function GalleryList() {
                                     width: "100%",
                                     height: "150px",
                                     objectFit: "cover",
-                                    borderRadius: "8px",
+                                    borderRadius: "12px",
                                   }}
                                 />
                               ) : (
-                                <Text
-                                  fontWeight="semibold"
-                                  color="#34384D"
-                                  fontSize="sm"
-                                >
-                                  Click to upload video
-                                </Text>
+                                <VStack gap="8px" py="8px">
+                                  <Flex
+                                    w="48px"
+                                    h="48px"
+                                    borderRadius="full"
+                                    bg="white"
+                                    border="1px solid"
+                                    borderColor="gray.200"
+                                    color="#0D9488"
+                                    align="center"
+                                    justify="center"
+                                  >
+                                    <Icon as={FiUploadCloud} boxSize="20px" />
+                                  </Flex>
+                                  <Box>
+                                    <Text fontWeight="600" color="#34384D" fontSize="sm">
+                                      Click to upload video
+                                    </Text>
+                                  </Box>
+                                </VStack>
                               )}
                             </Box>
                           </Field.Root>
                         )}
                       </VStack>
                     </Box>
-
-                    <Separator borderColor="gray.100" />
-
-                    
                   </VStack>
                 </Box>
               </Dialog.Body>
 
+              {/* FOOTER */}
               <Dialog.Footer
-                borderTop="1px solid"
-                borderColor="gray.100"
                 pt="20px"
                 pb="24px"
-                px={{ base: "24px", md: "32px" }}
-                bg="gray.50"
-                borderBottomRadius="20px"
+                px={{ base: "22px", md: "32px" }}
+                bg="white"
+                borderTop="1px solid"
+                borderColor="gray.100"
               >
-                <HStack gap="12px" w="100%" justifyContent="flex-end">
+                <HStack gap="10px" w="100%" justifyContent="flex-end">
                   <Button
-                    variant="ghost"
-                    borderRadius="10px"
+                    {...softOutline}
                     onClick={closeForm}
                     disabled={saving}
-                    color="gray.600"
-                    _hover={{ bg: "gray.200" }}
+                    h="42px"
+                    px="22px"
                   >
                     Cancel
                   </Button>
-
                   <Button
                     type="submit"
                     form="gallery-form"
                     bg="#4545A5"
                     color="white"
-                    borderRadius="10px"
+                    fontWeight="700"
+                    fontSize="sm"
+                    borderRadius="full"
+                    h="42px"
+                    px="26px"
                     loading={saving}
                     disabled={saving}
                     _hover={{ bg: "#353584" }}
-                    boxShadow="md"
-                    px="8"
+                    _active={{ bg: "#2C2C6E" }}
                   >
                     {editingId !== null ? "Save Changes" : "Publish Media"}
                   </Button>
@@ -918,7 +985,9 @@ export default function GalleryList() {
         </Portal>
       </Dialog.Root>
 
-      {/* DELETE MODAL */}
+      {/* ============================================================
+          DELETE MODAL — soft floating card
+          ============================================================ */}
       <Dialog.Root
         open={Boolean(deleteTarget)}
         onOpenChange={(e) => !e.open && setDeleteTarget(null)}
@@ -926,129 +995,126 @@ export default function GalleryList() {
         size="md"
       >
         <Portal>
-          <Dialog.Backdrop
-            bg="blackAlpha.600"
-            backdropFilter="blur(3px)"
-          />
-
-          <Dialog.Positioner>
+          <Dialog.Backdrop bg="rgba(32,36,58,0.4)" backdropFilter="blur(8px)" />
+          <Dialog.Positioner px="16px">
             <Dialog.Content
-              maxW={{ base: "calc(100% - 32px)", sm: "460px" }}
-              borderRadius="20px"
+              width="100%"
+              maxWidth="440px"
+              borderRadius="24px"
               overflow="hidden"
-              boxShadow="2xl"
-              p="0"
+              boxShadow="0 30px 80px rgba(32,36,58,0.18)"
+              bg="white"
             >
-              {/* HEADER */}
+              <Dialog.CloseTrigger asChild>
+                <CloseButton
+                  size="sm"
+                  position="absolute"
+                  top="14px"
+                  right="14px"
+                  color="gray.400"
+                  borderRadius="full"
+                  _hover={{ bg: "gray.100", color: "gray.700" }}
+                />
+              </Dialog.CloseTrigger>
+
               <Dialog.Header
-                px="28px"
-                pt="28px"
-                pb="20px"
                 display="flex"
+                flexDirection="column"
                 alignItems="center"
-                gap="16px"
+                textAlign="center"
+                pt="32px"
+                px="24px"
+                pb="10px"
               >
                 <Flex
-                  w="52px"
-                  h="52px"
-                  flexShrink="0"
+                  width="56px"
+                  height="56px"
                   borderRadius="full"
-                  bg="#FDECF3"
+                  background="#FDF2F8"
                   color="#DB2777"
                   align="center"
                   justify="center"
+                  mb="16px"
                 >
-                  <Icon as={FiTrash2} boxSize="23px" />
+                  <Icon as={FiTrash2} boxSize="24px" />
                 </Flex>
-
-                <Box>
-                  <Dialog.Title
-                    color="#20243A"
-                    fontSize="lg"
-                    fontWeight="bold"
-                  >
-                    Delete this item?
-                  </Dialog.Title>
-
-                  <Text color="gray.500" fontSize="sm" mt="4px">
-                    Please confirm this action.
-                  </Text>
-                </Box>
+                <Dialog.Title
+                  color="#20243A"
+                  fontSize="lg"
+                  fontWeight="700"
+                  lineHeight="1.3"
+                >
+                  Delete this item?
+                </Dialog.Title>
               </Dialog.Header>
 
-              {/* BODY */}
-              <Dialog.Body px="28px" pb="24px">
-                <Box
-                  bg="#FFF5F8"
-                  border="1px solid"
-                  borderColor="#FBCFE0"
-                  borderRadius="12px"
-                  p="16px"
-                >
-                  <Text color="gray.600" fontSize="sm" lineHeight="1.8">
-                    You are about to permanently delete
-                  </Text>
-
-                  <Text
-                    color="#20243A"
-                    fontWeight="bold"
-                    fontSize="md"
-                    mt="6px"
-                    wordBreak="break-word"
+              <Dialog.Body px="24px" pt="6px" pb="22px">
+                <VStack align="stretch" gap="14px">
+                  <Box
+                    bg="gray.50"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    borderRadius="12px"
+                    padding="12px 16px"
+                    textAlign="left"
                   >
-                    “{deleteTarget?.title}”
-                  </Text>
+                    <Text color="gray.500" fontSize="xs" fontWeight="600" mb="4px">
+                      MEDIA ITEM
+                    </Text>
+                    <Text
+                      color="#20243A"
+                      fontSize="sm"
+                      fontWeight="600"
+                      wordBreak="break-word"
+                    >
+                      {deleteTarget?.title}
+                    </Text>
+                  </Box>
 
                   <Text
-                    color="#DB2777"
+                    color="gray.600"
                     fontSize="sm"
-                    fontWeight="medium"
-                    mt="10px"
+                    textAlign="center"
+                    lineHeight="1.7"
                   >
-                    This action cannot be undone.
+                    This action is permanent and cannot be undone.
                   </Text>
-                </Box>
+                </VStack>
               </Dialog.Body>
 
-              {/* FOOTER */}
               <Dialog.Footer
-                px="28px"
-                pt="18px"
-                pb="26px"
-                borderTop="1px solid"
-                borderColor="gray.100"
-                bg="gray.50"
+                px="24px"
+                pt="0"
+                pb="24px"
+                display="flex"
+                justifyContent="center"
+                gap="10px"
+                flexDirection={{ base: "column-reverse", sm: "row" }}
               >
-                <Flex
-                  w="100%"
-                  gap="12px"
-                  justify="flex-end"
-                  direction={{ base: "column-reverse", sm: "row" }}
+                <Button
+                  width={{ base: "100%", sm: "auto" }}
+                  minWidth="120px"
+                  height="40px"
+                  {...softOutline}
+                  onClick={() => setDeleteTarget(null)}
                 >
-                  <Button
-                    variant="outline"
-                    borderRadius="10px"
-                    borderColor="gray.300"
-                    color="gray.700"
-                    w={{ base: "100%", sm: "auto" }}
-                    onClick={() => setDeleteTarget(null)}
-                    _hover={{ bg: "gray.100" }}
-                  >
-                    Cancel
-                  </Button>
-
-                  <Button
-                    color="white"
-                    bg="#DB2777"
-                    borderRadius="10px"
-                    w={{ base: "100%", sm: "auto" }}
-                    onClick={handleDelete}
-                    _hover={{ bg: "#BE185D" }}
-                  >
-                    <FiTrash2 />
-                    Delete Item
-                  </Button>
-                </Flex>
+                  Cancel
+                </Button>
+                <Button
+                  width={{ base: "100%", sm: "auto" }}
+                  minWidth="120px"
+                  height="40px"
+                  bg="#DB2777"
+                  color="white"
+                  fontWeight="700"
+                  fontSize="sm"
+                  borderRadius="full"
+                  _hover={{ bg: "#BE185D" }}
+                  _active={{ bg: "#9D174D" }}
+                  onClick={handleDelete}
+                >
+                  <FiTrash2 /> Delete Item
+                </Button>
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>

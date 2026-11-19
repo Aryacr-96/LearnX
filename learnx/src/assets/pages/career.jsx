@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import {
   Box, Container, Flex, Grid, Heading, Text, Image, Spinner, Center,
+  Dialog, Portal, CloseButton, useDisclosure, IconButton,
 } from "@chakra-ui/react";
-import { FiChevronDown, FiPlayCircle } from "react-icons/fi";
+import { FiChevronDown, FiPlayCircle, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import { resolveImageUrl, BACKEND_BASE_URL as BACKEND_URL } from "../../services/publicApi";
-
-// Localhost setup (commented out):
-// const BACKEND_URL = "http://localhost:8000";
 
 const pagePadding = {
   base: "20px", sm: "30px", md: "45px", lg: "180px", xl: "190px",
@@ -18,13 +16,16 @@ const pagePadding = {
 const getJobSlug = (title) =>
   title.toLowerCase().trim().replace(/\s+/g, "-");
 
-const getYoutubeThumbnail = (url) => {
+const getYoutubeId = (url) => {
   if (!url) return null;
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
   const match = url.match(regExp);
-  return match && match[2].length === 11
-    ? `https://img.youtube.com/vi/${match[2]}/hqdefault.jpg`
-    : null;
+  return match && match[2].length === 11 ? match[2] : null;
+};
+
+const getYoutubeThumbnail = (url) => {
+  const id = getYoutubeId(url);
+  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
 };
 
 function Career() {
@@ -32,10 +33,14 @@ function Career() {
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState([]);
 
-  // ✅ Life @ Learnx now comes from /api/gallery/
   const [gallery, setGallery] = useState([]);
   const [galleryLoading, setGalleryLoading] = useState(true);
 
+  // Lightbox state
+  const { open, onOpen, onClose } = useDisclosure();
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  // Fetch careers
   useEffect(() => {
     fetch(`${BACKEND_URL}/api/careers/`)
       .then((res) => res.json())
@@ -55,7 +60,7 @@ function Career() {
       });
   }, []);
 
-  // ✅ Fetch gallery items for the "Life @ Learnx" grid
+  // Fetch gallery
   useEffect(() => {
     let cancelled = false;
     fetch(`${BACKEND_URL}/api/gallery/`)
@@ -66,7 +71,6 @@ function Career() {
       .then((data) => {
         if (cancelled) return;
         const items = Array.isArray(data) ? data : data.results ?? [];
-        // Only keep items we can render as a tile: image or YouTube
         setGallery(items.filter((item) => item.image || item.youtube_url));
       })
       .catch((err) => {
@@ -89,10 +93,46 @@ function Career() {
     );
   };
 
+  const openLightbox = (index) => {
+    setActiveIndex(index);
+    onOpen();
+  };
+
+  const showPrev = useCallback(() => {
+    setActiveIndex((i) => (i - 1 + gallery.length) % gallery.length);
+  }, [gallery.length]);
+
+  const showNext = useCallback(() => {
+    setActiveIndex((i) => (i + 1) % gallery.length);
+  }, [gallery.length]);
+
+  // Keyboard navigation: ← → Esc
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        showPrev();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        showNext();
+      } else if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open, showPrev, showNext, onClose]);
+
+  const activeItem = gallery[activeIndex];
+  const activeYoutubeId = activeItem ? getYoutubeId(activeItem.youtube_url) : null;
+  const activeImage = activeItem?.image ? resolveImageUrl(activeItem.image) : null;
+
   return (
     <Box bg="white" color="#151b2e" width="100%" overflow="hidden">
       <Header />
 
+      {/* Current Openings Section */}
       <Box
         background="#ffffff"
         minHeight="100vh"
@@ -133,7 +173,7 @@ function Career() {
           ) : (
             <Box width="100%" maxWidth="915px" marginX="auto">
               {Object.entries(groupedOpenings).map(([department, jobs], index) => {
-                const isOpen = expanded.includes(index);
+                const isOpenDept = expanded.includes(index);
                 return (
                   <Box
                     key={department}
@@ -157,7 +197,7 @@ function Career() {
                       background="white"
                       cursor="pointer"
                       onClick={() => toggleOpening(index)}
-                      aria-expanded={isOpen}
+                      aria-expanded={isOpenDept}
                       _hover={{ background: "#fafafa" }}
                     >
                       <Text fontSize={{ base: "16px", md: "20px" }} fontWeight="500" color="#111827">
@@ -169,11 +209,11 @@ function Career() {
                         flexShrink={0}
                         color="#111827"
                         transition="transform 0.25s ease"
-                        transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
+                        transform={isOpenDept ? "rotate(180deg)" : "rotate(0deg)"}
                       />
                     </Flex>
 
-                    {isOpen && (
+                    {isOpenDept && (
                       <Box
                         borderTop="1px solid #e5e7eb"
                         paddingX={{ base: "18px", md: "27px" }}
@@ -241,7 +281,7 @@ function Career() {
         </Container>
       </Box>
 
-      {/* Life @ Learnx — now powered by /api/gallery/ */}
+      {/* Life @ Learnx Section */}
       <Box width="100%" background="white" paddingTop="0" paddingBottom="80px">
         <Container maxWidth="1470px" paddingX={pagePadding} mt={{ base: "-50px", md: "-75px" }}>
           <Box width="100%" textAlign="center" marginBottom={{ base: "45px", md: "55px" }}>
@@ -297,17 +337,18 @@ function Career() {
                 return (
                   <Box
                     key={item.id}
+                    as="button"
+                    type="button"
+                    onClick={() => openLightbox(index)}
                     height={{ base: "240px", sm: "250px", md: "280px" }}
-                    gridColumn={{
-                      base: "auto",
-                      sm: "auto",
-                      lg: index === 2 ? "3" : "auto",
-                    }}
-                    gridRow={{ lg: index === 2 ? "1 / span 2" : "auto" }}
                     borderRadius="12px"
                     overflow="hidden"
                     background="#f1f5f9"
                     position="relative"
+                    cursor="pointer"
+                    padding="0"
+                    border="none"
+                    textAlign="left"
                   >
                     <Image
                       src={thumbnail}
@@ -317,6 +358,7 @@ function Career() {
                       objectFit="cover"
                       transition="transform 0.4s ease"
                       _hover={{ transform: "scale(1.04)" }}
+                      loading="lazy"
                     />
 
                     {item.youtube_url && !item.image && (
@@ -339,6 +381,107 @@ function Career() {
           )}
         </Container>
       </Box>
+
+      {/* Lightbox Dialog (Chakra UI v3) */}
+      <Dialog.Root open={open} onOpenChange={(e) => !e.open && onClose()} size="full" placement="center">
+        <Portal>
+          <Dialog.Backdrop bg="blackAlpha.900" />
+          <Dialog.Positioner>
+            <Dialog.Content bg="transparent" boxShadow="none" maxWidth="100vw" height="100vh">
+              <Dialog.CloseTrigger asChild>
+                <CloseButton 
+                  color="white" 
+                  zIndex="20" 
+                  size="lg" 
+                  bg="blackAlpha.600" 
+                  borderRadius="full" 
+                  _hover={{ bg: "blackAlpha.800" }}
+                  position="fixed"
+                  top="20px"
+                  right="20px"
+                />
+              </Dialog.CloseTrigger>
+              
+              <Dialog.Body 
+                padding="0" 
+                position="relative" 
+                display="flex" 
+                alignItems="center" 
+                justifyContent="center"
+                height="100%"
+              >
+                {/* Prev Button */}
+                {gallery.length > 1 && (
+                  <IconButton
+                    aria-label="Previous"
+                    icon={<FiChevronLeft size={32} />}
+                    onClick={showPrev}
+                    position="fixed"
+                    left={{ base: "10px", md: "40px" }}
+                    top="50%"
+                    transform="translateY(-50%)"
+                    bg="blackAlpha.600"
+                    color="white"
+                    _hover={{ bg: "blackAlpha.800" }}
+                    borderRadius="full"
+                    size="xl"
+                    zIndex="20"
+                  />
+                )}
+
+                {/* 
+                  Main Content (Image or Video) 
+                  We use key={activeIndex} to force React to completely destroy 
+                  the old video iframe and load the new one when arrow keys are pressed.
+                */}
+                {activeYoutubeId ? (
+                  <Box
+                    as="iframe"
+                    key={`video-${activeIndex}`} 
+                    title={activeItem?.title || "Life at LearnX"}
+                    src={`https://www.youtube.com/embed/${activeYoutubeId}?autoplay=1`}
+                    width="100%"
+                    maxWidth="1200px"
+                    height="70vh"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    style={{ border: 0, borderRadius: "10px" }}
+                  />
+                ) : activeImage ? (
+                  <Image
+                    key={`image-${activeIndex}`}
+                    src={activeImage}
+                    alt={activeItem?.title || "Life at LearnX"}
+                    maxHeight="85vh"
+                    maxWidth="90vw"
+                    objectFit="contain"
+                    borderRadius="10px"
+                  />
+                ) : null}
+
+                {/* Next Button */}
+                {gallery.length > 1 && (
+                  <IconButton
+                    aria-label="Next"
+                    icon={<FiChevronRight size={32} />}
+                    onClick={showNext}
+                    position="fixed"
+                    right={{ base: "10px", md: "40px" }}
+                    top="50%"
+                    transform="translateY(-50%)"
+                    bg="blackAlpha.600"
+                    color="white"
+                    _hover={{ bg: "blackAlpha.800" }}
+                    borderRadius="full"
+                    size="xl"
+                    zIndex="20"
+                  />
+                )}
+              </Dialog.Body>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
 
       <Footer />
     </Box>
