@@ -27,7 +27,7 @@ import {
   FiInstagram,
   FiLinkedin,
   FiYoutube,
-  FiTwitter,
+  FiMessageCircle,
   FiMapPin,
   FiClock,
   FiMail,
@@ -145,7 +145,7 @@ export default function Settings() {
     instagram_url: "",
     linkedin_url: "",
     youtube_url: "",
-    twitter_url: "",
+    whatsapp_url: "",
   });
 
   const [editSection, setEditSection] = useState(null);
@@ -158,7 +158,7 @@ export default function Settings() {
 
         const settings = Array.isArray(data)
           ? data[0]
-          : data.results
+          : data?.results
             ? data.results[0]
             : data;
 
@@ -174,7 +174,7 @@ export default function Settings() {
             instagram_url: settings.instagram_url || "",
             linkedin_url: settings.linkedin_url || "",
             youtube_url: settings.youtube_url || "",
-            twitter_url: settings.twitter_url || "",
+            whatsapp_url: settings.whatsapp_url || "",
           });
         }
       } catch (err) {
@@ -256,7 +256,7 @@ export default function Settings() {
         instagram_url: formData.instagram_url,
         linkedin_url: formData.linkedin_url,
         youtube_url: formData.youtube_url,
-        twitter_url: formData.twitter_url,
+        whatsapp_url: formData.whatsapp_url,
       };
     }
 
@@ -331,14 +331,14 @@ export default function Settings() {
       updatedData.instagram_url = "";
       updatedData.linkedin_url = "";
       updatedData.youtube_url = "";
-      updatedData.twitter_url = "";
+      updatedData.whatsapp_url = "";
 
       payload = {
         facebook_url: "",
         instagram_url: "",
         linkedin_url: "",
         youtube_url: "",
-        twitter_url: "",
+        whatsapp_url: "",
       };
     }
 
@@ -383,7 +383,7 @@ export default function Settings() {
     formData.instagram_url ||
     formData.linkedin_url ||
     formData.youtube_url ||
-    formData.twitter_url;
+    formData.whatsapp_url;
 
   const socialItems = [
     {
@@ -411,10 +411,10 @@ export default function Settings() {
       color: "#FF0000",
     },
     {
-      key: "twitter_url",
-      icon: FiTwitter,
-      label: "Twitter / X",
-      color: "#1DA1F2",
+      key: "whatsapp_url",
+      icon: FiMessageCircle,
+      label: "WhatsApp",
+      color: "#25D366",
     },
   ];
 
@@ -969,11 +969,7 @@ export default function Settings() {
                         placeholder="Paste Google Maps embed URL"
                       />
 
-                      <Box
-                        bg="#EEEEFB"
-                        borderRadius="10px"
-                        p={3}
-                      >
+                      <Box bg="#EEEEFB" borderRadius="10px" p={3}>
                         <HStack align="start" gap={2}>
                           <Icon as={FiMapPin} color={PRIMARY} mt="2px" />
                           <Text fontSize="xs" color="#4545A5" lineHeight="1.6">
@@ -1032,11 +1028,11 @@ export default function Settings() {
                       />
 
                       <FormField
-                        label="Twitter / X URL"
-                        name="twitter_url"
-                        value={formData.twitter_url}
+                        label="WhatsApp URL or Phone Number"
+                        name="whatsapp_url"
+                        value={formData.whatsapp_url}
                         onChange={handleChange}
-                        placeholder="https://x.com/..."
+                        placeholder="https://wa.me/919876543210"
                       />
                     </>
                   )}
@@ -1236,3 +1232,4 @@ export default function Settings() {
     </VStack>
   );
 }
+

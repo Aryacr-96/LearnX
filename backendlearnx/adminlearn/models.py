@@ -299,21 +299,22 @@ class SiteSettings(models.Model):
     email = models.EmailField(default="contact@learnx.com")
     phone = models.CharField(max_length=20, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
-    working_hours = models.CharField(max_length=255, default="Mon-Fri: 9AM - 5PM")
-    
-    
+    working_hours = models.CharField(
+        max_length=255,
+        default="Mon-Fri: 9AM - 5PM"
+    )
+
     google_map_url = models.URLField(max_length=1000, blank=True, null=True)
-    
+
     # Social Media Links
     facebook_url = models.URLField(blank=True, null=True)
     instagram_url = models.URLField(blank=True, null=True)
     linkedin_url = models.URLField(blank=True, null=True)
     youtube_url = models.URLField(blank=True, null=True)
-    twitter_url = models.URLField(blank=True, null=True)
+    whatsapp_url = models.URLField(blank=True, null=True)
 
     class Meta:
         verbose_name_plural = "Site Settings"
 
     def __str__(self):
         return self.institute_name
-    

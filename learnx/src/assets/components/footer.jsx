@@ -32,14 +32,22 @@ function Footer() {
     const fetchSettings = async () => {
       try {
         const data = await getPublicSettings();
-        const siteSettings = Array.isArray(data) ? data[0] : (data?.results ? data.results[0] : data);
+
+        const siteSettings = Array.isArray(data)
+          ? data[0]
+          : data?.results
+          ? data.results[0]
+          : data;
+
         setSettings(siteSettings || {});
       } catch (err) {
         console.error("Failed to load footer settings", err);
+        setSettings({});
       } finally {
         setLoading(false);
       }
     };
+
     fetchSettings();
   }, []);
 
@@ -52,9 +60,67 @@ function Footer() {
     { name: "Contact Us", path: "/contact" },
   ];
 
+  // Convert WhatsApp number into a WhatsApp link if needed.
+  const getWhatsAppUrl = (value) => {
+    if (!value) return "";
+
+    const trimmedValue = String(value).trim();
+
+    if (/^https?:\/\//i.test(trimmedValue)) {
+      return trimmedValue;
+    }
+
+    const phoneNumber = trimmedValue.replace(/\D/g, "");
+
+    return phoneNumber
+      ? `https://wa.me/${phoneNumber}`
+      : "";
+  };
+
+  // Social media links from Website Settings.
+  const socialLinks = [
+    {
+      url: settings?.linkedin_url,
+      icon: FaLinkedinIn,
+      label: "LinkedIn",
+      color: "#0A66C2",
+    },
+    {
+      url: settings?.youtube_url,
+      icon: FaYoutube,
+      label: "YouTube",
+      color: "#FF0000",
+    },
+    {
+      url: settings?.facebook_url,
+      icon: FaFacebookF,
+      label: "Facebook",
+      color: "#1877F2",
+    },
+    {
+      url: settings?.instagram_url,
+      icon: FaInstagram,
+      label: "Instagram",
+      color: "#E1306C",
+    },
+    {
+      url: getWhatsAppUrl(settings?.whatsapp_url),
+      icon: FaWhatsapp,
+      label: "WhatsApp",
+      color: "#25D366",
+    },
+  ];
+
   if (loading) {
     return (
-      <Box background="#0b0b0b" color="white" width="100%" py={10} display="flex" justifyContent="center">
+      <Box
+        background="#0b0b0b"
+        color="white"
+        width="100%"
+        py={10}
+        display="flex"
+        justifyContent="center"
+      >
         <Spinner color="white" />
       </Box>
     );
@@ -95,35 +161,33 @@ function Footer() {
         >
           {/* ================= COLUMN 1 ================= */}
           <Box>
-  <Image
-    src="/images/svg-06.svg"
-    alt="Appzia LearnX"
-    width={{
-      base: "125px",
-      md: "140px",
-    }}
-    height="auto"
-    objectFit="contain"
-  />
+            <Image
+              src="/images/svg-06.svg"
+              alt="Appzia LearnX"
+              width={{
+                base: "125px",
+                md: "140px",
+              }}
+              height="auto"
+              objectFit="contain"
+            />
 
-  <Text
-    // 👇 Reduced margin from 45px/50px down to 20px
-    marginTop={{
-      base: "-10px",
-      md: "-15px",
-    }}
-    color="#d5d5d5"
-    fontSize={{
-      base: "15px",
-      md: "16px",
-    }}
-    lineHeight="1.9"
-    maxWidth="350px"
-  >
-    {/* Dynamic Address */}
-    {settings?.address || "Address will be updated soon."}
-  </Text>
-</Box>
+            <Text
+              marginTop={{
+                base: "-10px",
+                md: "-15px",
+              }}
+              color="#d5d5d5"
+              fontSize={{
+                base: "15px",
+                md: "16px",
+              }}
+              lineHeight="1.9"
+              maxWidth="350px"
+            >
+              {settings?.address || "Address will be updated soon."}
+            </Text>
+          </Box>
 
           {/* ================= COLUMN 2 ================= */}
           <Box>
@@ -140,6 +204,7 @@ function Footer() {
               paddingBottom="10px"
             >
               Quick Links
+
               <Box
                 position="absolute"
                 left="0"
@@ -151,7 +216,11 @@ function Footer() {
               />
             </Heading>
 
-            <Flex direction="column" gap="13px" marginTop="25px">
+            <Flex
+              direction="column"
+              gap="13px"
+              marginTop="25px"
+            >
               {quickLinks.map((item) => (
                 <Link
                   key={item.name}
@@ -175,187 +244,157 @@ function Footer() {
           </Box>
 
           {/* ================= COLUMN 3 ================= */}
-         <Box>
-  <Heading
-    as="h3"
-    fontSize={{
-      base: "23px",
-      md: "25px",
-    }}
-    fontWeight="700"
-    color="white"
-    position="relative"
-    display="inline-block"
-    paddingBottom="10px"
-  >
-    Contact Us
-    <Box
-      position="absolute"
-      left="0"
-      bottom="0"
-      width="54px"
-      height="4px"
-      background="#ffffff"
-      borderRadius="10px"
-    />
-  </Heading>
+          <Box>
+            <Heading
+              as="h3"
+              fontSize={{
+                base: "23px",
+                md: "25px",
+              }}
+              fontWeight="700"
+              color="white"
+              position="relative"
+              display="inline-block"
+              paddingBottom="10px"
+            >
+              Contact Us
 
-  {/* PHONE */}
-  {/* 👇 Reduced from 27px to 16px */}
-  <Flex alignItems="center" gap="15px" marginTop="16px">
-    <Flex
-      width="45px"
-      height="45px"
-      flexShrink="0"
-      borderRadius="50%"
-      background="#242424"
-      alignItems="center"
-      justifyContent="center"
-      color="white"
-      fontSize="16px"
-    >
-      <FaPhoneAlt />
-    </Flex>
-    <Text color="#d5d5d5" fontSize={{ base: "15px", md: "16px" }}>
-      {settings?.phone || "+91 98765 43210"}
-    </Text>
-  </Flex>
+              <Box
+                position="absolute"
+                left="0"
+                bottom="0"
+                width="54px"
+                height="4px"
+                background="#ffffff"
+                borderRadius="10px"
+              />
+            </Heading>
 
-  {/* EMAIL */}
-  {/* 👇 Reduced from 18px to 12px */}
-  <Flex alignItems="center" gap="15px" marginTop="12px">
-    <Flex
-      width="45px"
-      height="45px"
-      flexShrink="0"
-      borderRadius="50%"
-      background="#242424"
-      alignItems="center"
-      justifyContent="center"
-      color="white"
-      fontSize="16px"
-    >
-      <FaEnvelope />
-    </Flex>
-    <Text color="#d5d5d5" fontSize={{ base: "15px", md: "16px" }}>
-      {settings?.email || "info@appzialearnx.com"}
-    </Text>
-  </Flex>
+            {/* PHONE */}
+            <Flex
+              alignItems="center"
+              gap="15px"
+              marginTop="16px"
+            >
+              <Flex
+                width="45px"
+                height="45px"
+                flexShrink="0"
+                borderRadius="50%"
+                background="#242424"
+                alignItems="center"
+                justifyContent="center"
+                color="white"
+                fontSize="16px"
+              >
+                <FaPhoneAlt />
+              </Flex>
 
-  {/* LOCATION */}
-  {/* 👇 Reduced from 18px to 12px */}
-  <Flex alignItems="center" gap="15px" marginTop="12px">
-    <Flex
-      width="45px"
-      height="45px"
-      flexShrink="0"
-      borderRadius="50%"
-      background="#242424"
-      alignItems="center"
-      justifyContent="center"
-      color="white"
-      fontSize="17px"
-    >
-      <FaMapMarkerAlt />
-    </Flex>
-    <Text color="#d5d5d5" fontSize={{ base: "15px", md: "16px" }}>
-      {settings?.address || "Sultan Bathery, Kerala"}
-    </Text>
-  </Flex>
+              <Text
+                color="#d5d5d5"
+                fontSize={{ base: "15px", md: "16px" }}
+              >
+                {settings?.phone || "+91 98765 43210"}
+              </Text>
+            </Flex>
 
-  {/* ================= SOCIAL ICONS ================= */}
-  {/* 👇 Set marginTop to 24px to separate it from the address row */}
-  <Flex gap="14px" marginTop="24px" flexWrap="wrap">
-    {/* LINKEDIN */}
-    <Link
-      href={settings?.linkedin_url || "#"}
-      isExternal
-      width="45px"
-      height="45px"
-      borderRadius="50%"
-      background="#242424"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      color="white"
-      fontSize="17px"
-      _hover={{ background: "#333333" }}
-    >
-      <FaLinkedinIn />
-    </Link>
+            {/* EMAIL */}
+            <Flex
+              alignItems="center"
+              gap="15px"
+              marginTop="12px"
+            >
+              <Flex
+                width="45px"
+                height="45px"
+                flexShrink="0"
+                borderRadius="50%"
+                background="#242424"
+                alignItems="center"
+                justifyContent="center"
+                color="white"
+                fontSize="16px"
+              >
+                <FaEnvelope />
+              </Flex>
 
-    {/* YOUTUBE */}
-    <Link
-      href={settings?.youtube_url || "#"}
-      isExternal
-      width="45px"
-      height="45px"
-      borderRadius="50%"
-      background="#242424"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      color="white"
-      fontSize="17px"
-      _hover={{ background: "#333333" }}
-    >
-      <FaYoutube />
-    </Link>
+              <Text
+                color="#d5d5d5"
+                fontSize={{ base: "15px", md: "16px" }}
+                wordBreak="break-word"
+              >
+                {settings?.email || "info@appzialearnx.com"}
+              </Text>
+            </Flex>
 
-    {/* FACEBOOK */}
-    <Link
-      href={settings?.facebook_url || "#"}
-      isExternal
-      width="45px"
-      height="45px"
-      borderRadius="50%"
-      background="#242424"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      color="white"
-      fontSize="17px"
-      _hover={{ background: "#333333" }}
-    >
-      <FaFacebookF />
-    </Link>
+            {/* LOCATION */}
+            <Flex
+              alignItems="center"
+              gap="15px"
+              marginTop="12px"
+            >
+              <Flex
+                width="45px"
+                height="45px"
+                flexShrink="0"
+                borderRadius="50%"
+                background="#242424"
+                alignItems="center"
+                justifyContent="center"
+                color="white"
+                fontSize="17px"
+              >
+                <FaMapMarkerAlt />
+              </Flex>
 
-    {/* INSTAGRAM */}
-    <Link
-      href={settings?.instagram_url || "#"}
-      isExternal
-      width="45px"
-      height="45px"
-      borderRadius="50%"
-      background="#242424"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      color="white"
-      fontSize="17px"
-      _hover={{ background: "#333333" }}
-    >
-      <FaInstagram />
-    </Link>
+              <Text
+                color="#d5d5d5"
+                fontSize={{ base: "15px", md: "16px" }}
+                wordBreak="break-word"
+              >
+                {settings?.address || "Sultan Bathery, Kerala"}
+              </Text>
+            </Flex>
 
-    {/* WHATSAPP */}
-    <Link
-      href="#" // Update this if you add a WhatsApp field to your backend later
-      width="45px"
-      height="45px"
-      borderRadius="50%"
-      background="#242424"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      color="white"
-      fontSize="17px"
-      _hover={{ background: "#333333" }}
-    >
-      <FaWhatsapp />
-    </Link>
-  </Flex>
-</Box>
+            {/* ================= SOCIAL MEDIA LINKS ================= */}
+            <Flex
+              gap="14px"
+              marginTop="24px"
+              flexWrap="wrap"
+              alignItems="center"
+            >
+              {socialLinks
+                .filter((item) => item.url)
+                .map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={item.label}
+                    title={item.label}
+                    width="45px"
+                    height="45px"
+                    flexShrink="0"
+                    borderRadius="50%"
+                    background="#242424"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    color="white"
+                    fontSize="18px"
+                    transition="all 0.3s ease"
+                    _hover={{
+                      background: item.color,
+                      color: "white",
+                      transform: "translateY(-5px)",
+                    }}
+                  >
+                    <item.icon />
+                  </Link>
+                ))}
+            </Flex>
+          </Box>
         </SimpleGrid>
 
         {/* ================= DIVIDER ================= */}
@@ -378,7 +417,11 @@ function Footer() {
           }}
         >
           Copyright ©2025 All rights reserved | Design by{" "}
-          <Box as="span" color="white" fontWeight="600">
+          <Box
+            as="span"
+            color="white"
+            fontWeight="600"
+          >
             {settings?.institute_name || "Appzia Tec Solutions"}
           </Box>
         </Text>
