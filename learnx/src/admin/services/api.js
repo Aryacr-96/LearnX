@@ -66,6 +66,12 @@ export const adminLogin = async (identifier, password) => {
     JSON.stringify(data.permissions || {})
   );
 
+  // 👇 FIXED: Save the force-change-password flag so the frontend knows to redirect
+  localStorage.setItem(
+    "learnx_admin_must_change_password", 
+    data.must_change_password ? "true" : "false"
+  );
+
   return data;
 };
 
@@ -79,6 +85,8 @@ export const adminLogout = () => {
   localStorage.removeItem("learnx_admin_name");
   localStorage.removeItem("learnx_admin_role");
   localStorage.removeItem("learnx_admin_permissions");
+  // 👇 FIXED: Clear the force-change-password flag on logout
+  localStorage.removeItem("learnx_admin_must_change_password"); 
 };
 
 // ---------------------------------------------------------------------------
@@ -153,8 +161,11 @@ export const apiRequest = async (endpoint, options = {}) => {
       response: data,
     });
 
-    // Auto-logout on 401
-    if (response.status === 401) {
+    // 👇 FIXED: Do NOT auto-logout if the failure is from the change-password endpoint.
+    // The backend deletes the old token when a password is changed, which can cause 
+    // a momentary 401. If we logout here, the user is kicked out before their new 
+    // token can be saved.
+    if (response.status === 401 && !endpoint.includes("/change-password/")) {
       adminLogout();
     }
 

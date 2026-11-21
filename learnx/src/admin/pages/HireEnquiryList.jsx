@@ -419,7 +419,7 @@ export default function HireEnquiryList() {
                       </Box>
                     </HStack>
 
-                    <Badge
+                    {/* <Badge
                       flexShrink={0}
                       bg={enquiry.is_read ? "#E8F8F1" : "#FDECF3"}
                       color={enquiry.is_read ? "#059669" : "#DB2777"}
@@ -429,7 +429,7 @@ export default function HireEnquiryList() {
                       fontSize="10px"
                     >
                       {enquiry.is_read ? "READ" : "NEW"}
-                    </Badge>
+                    </Badge> */}
                   </Flex>
 
                   <Separator my={4} borderColor="#EEEEF4" />

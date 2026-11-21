@@ -783,17 +783,17 @@ def callback_detail(request, pk):
 # ===========================================================================
 # CHANGE PASSWORD
 # ===========================================================================
+# ===========================================================================
+# CHANGE PASSWORD
+# ===========================================================================
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def change_password(request):
     user = request.user
 
-    if get_role(user) not in ("admin", "subadmin"):
-        return Response(
-            {"detail": "Only administrators can change the password."},
-            status=status.HTTP_403_FORBIDDEN,
-        )
+    # Removed the role check so ANY authenticated user (admin or subadmin) 
+    # can change their own password.
 
     current_password = request.data.get("current_password", "")
     new_password = request.data.get("new_password", "")
@@ -819,11 +819,12 @@ def change_password(request):
     user.set_password(new_password)
     user.save()
     
-    # 👇 CLEAR THE FORCE-CHANGE FLAG HERE
+    # CLEAR THE FORCE-CHANGE FLAG HERE
     if hasattr(user, "profile"):
         user.profile.must_change_password = False
         user.profile.save()
 
+    # Delete old token and create a new one
     Token.objects.filter(user=user).delete()
     new_token = Token.objects.create(user=user)
 
@@ -831,7 +832,6 @@ def change_password(request):
         {"message": "Password changed successfully.", "token": new_token.key},
         status=status.HTTP_200_OK,
     )
-
 
 @api_view(["POST"])
 @authentication_classes([TokenAuthentication])

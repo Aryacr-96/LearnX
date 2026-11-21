@@ -309,3 +309,9 @@ def delete_managed_user(request, pk):
 
     user.delete()
     return Response({"message": "User deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+
+
