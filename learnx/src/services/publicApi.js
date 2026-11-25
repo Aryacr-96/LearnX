@@ -1,24 +1,47 @@
-// ==============================================================================
-// 🔴 LOCAL TESTING MODE
-// Once login works locally, you can switch these back to use import.meta.env
-// ==============================================================================
-export const BACKEND_BASE_URL = "http://127.0.0.1:8000";
-export const API_BASE_URL = "http://127.0.0.1:8000/api";
 
-// When you are ready to go live, comment out the two lines above, and uncomment these:
-// export const BACKEND_BASE_URL = (import.meta.env.VITE_MEDIA_BASE_URL || "http://127.0.0.1:8000").replace(/\/+$/, "");
-// export const API_BASE_URL = `${(import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000").replace(/\/+$/, "")}/api`;
+ // ==============================================================================
+// PRODUCTION MODE - DEPLOYED BACKEND
+// ==============================================================================
+
+export const BACKEND_BASE_URL =
+  "https://demo2.appziatec.in/backendlearnx";
+
+export const API_BASE_URL =
+  `${BACKEND_BASE_URL}/api`;
+
+// ==============================================================================
+// LOCAL TESTING MODE
+// Uncomment these when testing on your local computer.
+// ==============================================================================
+
+// export const BACKEND_BASE_URL = "http://127.0.0.1:8000";
+// export const API_BASE_URL = `${BACKEND_BASE_URL}/api`;
+
+// ==============================================================================
+// IMAGE URL RESOLVER
+// ==============================================================================
 
 export const resolveImageUrl = (url) => {
   if (!url) return null;
-  if (url.startsWith("http")) return url;
+
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
   const cleanPath = url.startsWith("/") ? url : `/${url}`;
+
   return `${BACKEND_BASE_URL}${cleanPath}`;
 };
 
+// ==============================================================================
+// PUBLIC REQUEST FUNCTION
+// ==============================================================================
+
 async function publicRequest(endpoint) {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    headers: { Accept: "application/json" },
+    headers: {
+      Accept: "application/json",
+    },
   });
 
   const data = await response.json().catch(() => ({}));
@@ -27,27 +50,36 @@ async function publicRequest(endpoint) {
     if (response.status === 404) {
       throw new Error("Not found");
     }
+
     throw new Error(data.detail || "Request failed.");
   }
 
   return data;
 }
 
-// ================= BLOG API =================
+// ==============================================================================
+// BLOG API
+// ==============================================================================
 
-export const getPublicBlogs = () => publicRequest("/blogs/");
+export const getPublicBlogs = () =>
+  publicRequest("/blogs/");
 
 export const getPublicBlog = (slug) =>
   publicRequest(`/blogs/slug/${encodeURIComponent(slug)}/`);
 
-// ================= GALLERY API =================
+// ==============================================================================
+// GALLERY API
+// ==============================================================================
 
-export const getPublicGallery = () => publicRequest("/gallery/");
+export const getPublicGallery = () =>
+  publicRequest("/gallery/");
 
 export const getPublicGalleryItem = (id) =>
   publicRequest(`/gallery/${id}/`);
 
-// ================= CONTACT API =================
+// ==============================================================================
+// CONTACT API
+// ==============================================================================
 
 export const sendContactMessage = async (data) => {
   const response = await fetch(`${API_BASE_URL}/contact/`, {
@@ -72,7 +104,9 @@ export const sendContactMessage = async (data) => {
     ) {
       errorMsg = Object.entries(responseData)
         .map(([field, errors]) =>
-          `${field}: ${Array.isArray(errors) ? errors.join(" ") : errors}`
+          `${field}: ${
+            Array.isArray(errors) ? errors.join(" ") : errors
+          }`
         )
         .join("\n");
     }
@@ -83,7 +117,9 @@ export const sendContactMessage = async (data) => {
   return responseData;
 };
 
-// ================= SETTINGS API =================
+// ==============================================================================
+// SETTINGS API
+// ==============================================================================
 
-// 👇 Added the missing function here
-export const getPublicSettings = () => publicRequest("/settings/");
+export const getPublicSettings = () =>
+  publicRequest("/settings/");
